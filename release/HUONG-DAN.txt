@@ -1,0 +1,75 @@
+TRÒ CHƠI TOÁN 1 – Bài 11: Phép trừ trong phạm vi 10 (SGK Toán 1 tập 1, trang 72–73)
+==================================================================================
+
+CÁCH MỞ
+  1. Chép cả thư mục "TroChoiToan1" vào máy (ổ D:, Desktop hoặc USB đều được).
+  2. Bấm đúp vào file "start.bat".
+  3. Một cửa sổ đen hiện lên và trình duyệt Edge tự mở trò chơi.
+     Đừng đóng cửa sổ đen trong lúc chơi. Muốn tắt trò chơi thì đóng cả hai.
+  Không cần mạng, không cần cài thêm gì.
+
+CHUYẾN THAM QUAN "VƯỜN THÚ SỐ VUI"
+  Bấm "Bắt đầu": xe buýt đưa cả lớp tới vườn thú, Vẹt Xanh làm hướng dẫn viên.
+  Đường đi có 4 cổng, mỗi cổng là một bài (thứ tự theo câu chuyện):
+    Cổng 1 – Trạm Soát Vé Bàn Tay Thần Kỳ  → Bài 3 (giơ ngón tay)
+    Cổng 2 – Vườn Hoa Bướm Xinh            → Bài 1
+    Cổng 3 – Đồng Cỏ Thỏ Nhảy Cà Rốt       → Bài 2
+    Cổng 4 – Hồ Ếch & Vòng Quay Ánh Nến    → Bài 4
+  Đi hết 4 cổng là tới Quảng Trường Huy Hiệu: cả lớp nhận huy hiệu "Nhà thám hiểm Phép Trừ nhí".
+
+  Cô điều khiển bằng các nút:
+    • "Đi tiếp" (ở đầu đường): đi tới Cổng 1. Vẹt Xanh đọc lời dẫn của cổng.
+    • "Vào cổng": mở trò chơi của cổng đó.
+    • "Qua cổng": ở dải trên cùng khi đang chơi, hoặc ở màn kết thúc. Bấm là cổng mở,
+      cả lớp đi luôn tới trước cổng kế tiếp (sau Cổng 4 là Quảng Trường),
+      được đánh dấu đã qua. Không cần chơi hết mới được qua (khi thiếu giờ).
+    • "Về đường đi": thoát trò chơi, đứng lại trước cổng, cổng chưa tính là đã qua.
+    • "Bản đồ" (góc trái màn đường đi): nhảy thẳng tới cổng bất kỳ hoặc Quảng Trường.
+    • Ở Quảng Trường: "Đi lại từ đầu" để bắt đầu chuyến mới.
+  Tải lại trang (F5) thì chuyến đi bắt đầu lại từ đầu.
+  Ở Cổng 1, mỗi câu đúng làm sáng một trong 8 bóng đèn của máy soát vé.
+
+CÁC BÀI
+  Bài 1 – Vườn Hoa Bướm Xinh (6 − 1 … 6 − 5, câu 6 − 1 là câu mẫu):
+          có 6 bông hoa vàng. Bấm vào số bông cần bớt: bướm bay tới đậu, bông chuyển đỏ
+          (bấm lại bông đỏ để bỏ chọn). Bớt đủ rồi thì đếm bông vàng còn lại và bấm
+          viên đá số đúng. Cuối bài có bảng 5 dòng giống trang sách.
+  Bài 2 – Thỏ nhảy tìm cà rốt: thỏ đi lần lượt từng ô, không nhảy cóc.
+          Ô sáng hỏi "Bằng …?": kết quả bằng số cần tìm thì bấm "Đúng", không bằng thì bấm "Sai".
+          Trả lời đúng thì thỏ nhảy lên ô đó; nhầm thì thỏ về vạch xuất phát, đi lại từ đầu.
+          Đi hết các ô thì thỏ nhảy vào hàng rào cà rốt.
+          Góc trái chọn chế độ:
+            • "1 người": một làn, một con thỏ.
+            • "2 đội": màn hình chia đôi, Đội Đỏ bên trái, Đội Xanh bên phải, hàng rào cà rốt
+              ở giữa. Hai đội xuất phát cùng lúc và trả lời cùng lúc, không chờ lượt
+              (màn hình cảm ứng thì mỗi đội bấm phần của mình; dùng chuột thì hai em
+              thay nhau cầm chuột). Mỗi đội có đồng hồ riêng và hàng nút "Số:" riêng
+              nên hai đội có thể tìm hai số khác nhau (đổi số thì cả hai đội xuất phát lại).
+              Đội về trước được "Về nhất"; đội kia vẫn chơi tiếp tới đích, rồi màn hình
+              xếp hạng hai đội theo thời gian.
+          Một người: góc phải chọn số cần tìm (2–9). "Màn mới" để có phép tính khác.
+  Bài 3 – Giơ ngón tay: học sinh giơ ngón tay trước webcam, giữ yên khoảng 1,5 giây.
+          Kết quả lớn hơn 5 thì dùng cả hai tay. Có bàn phím số ở dưới để dự phòng.
+  Bài 4 – Vườn thú: ngồi thuyền đi dọc sông, qua cổng cầu vồng vào vườn thú.
+     • Lái thuyền: phím W A S D, phím mũi tên, hoặc giữ nút ▲◀▼▶ ở góc phải.
+       Bấm các nút "Bến" bên trái thì thuyền tự chạy tới bến đó.
+       Kéo chuột để xoay nhìn quanh thuyền, lăn chuột để lại gần / ra xa.
+     • Kéo bạn ếch xuống sông, kéo bạn cò lên dải "bầu trời" ở trên cùng, bấm nến để thổi tắt.
+     • Giáo viên: bấm "Hiện đáp án" để hiện số đếm và phép trừ.
+     • Học sinh: làm theo nhiệm vụ (thuyền tự đưa tới bến), rồi chọn phép tính đúng.
+
+CAMERA
+  Lần đầu vào Bài 3, trình duyệt sẽ hỏi quyền dùng camera: bấm "Cho phép".
+  Nếu lỡ bấm "Chặn": bấm biểu tượng camera ở thanh địa chỉ, chọn "Luôn cho phép", rồi mở lại bài.
+  Hình ảnh camera chỉ xử lý trên máy, không lưu và không gửi đi đâu.
+  Máy có mạng: phần nhận diện bàn tay (MediaPipe) được tải mới từ web. Mất mạng thì tự dùng bản có sẵn.
+
+MÁY CHẠY CHẬM?
+  Bấm nút "Chất lượng: Cao" ở góc trên để chuyển sang "Thấp".
+
+NẾU BẤM start.bat MÀ KHÔNG CHẠY
+  • Cửa sổ đen báo cổng bận: đóng bớt chương trình rồi chạy lại.
+  • Máy chặn PowerShell: bấm chuột phải vào nút Start > "Terminal" hoặc "Windows PowerShell",
+    gõ lệnh sau rồi Enter (thay đường dẫn cho đúng chỗ để thư mục):
+        powershell -ExecutionPolicy Bypass -File "D:\TroChoiToan1\server.ps1"
+    Nếu vẫn bị chặn, nhờ cán bộ phụ trách máy tính cho phép chạy file server.ps1.
