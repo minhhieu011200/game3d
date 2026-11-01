@@ -40,14 +40,14 @@ Bộ nhận diện SHALL phát hiện tối đa 2 bàn tay. Với mỗi bàn tay
 - **THEN** bộ nhận diện báo "không thấy tay", không báo số 0
 
 ### Requirement: Làm mượt kết quả
-Bộ nhận diện SHALL làm mượt kết quả theo thời gian. Số ngón chỉ được coi là "ổn định" khi giữ nguyên liên tục trong một khoảng thời gian cấu hình được (mặc định 1,5 giây). Thời gian giữ còn lại được báo ra để vẽ thanh tiến trình.
+Bộ nhận diện SHALL làm mượt kết quả theo thời gian. Số ngón chỉ được coi là "ổn định" khi giữ nguyên liên tục trong một khoảng thời gian cấu hình được (mặc định 0,7 giây). Thời gian giữ còn lại được báo ra để vẽ thanh tiến trình.
 
 #### Scenario: Tay rung nhẹ
 - **WHEN** học sinh giơ 6 ngón nhưng có vài khung hình lẻ bị đếm thành 5
 - **THEN** kết quả hiển thị vẫn là 6 và quá trình giữ không bị đặt lại vì các khung hình lẻ đó
 
 #### Scenario: Giữ đủ thời gian
-- **WHEN** số ngón giữ nguyên là 6 trong 1,5 giây
+- **WHEN** số ngón giữ nguyên là 6 trong 0,7 giây
 - **THEN** bộ nhận diện phát sự kiện "chốt" với giá trị 6 đúng một lần
 
 ### Requirement: Nguồn tải MediaPipe JS

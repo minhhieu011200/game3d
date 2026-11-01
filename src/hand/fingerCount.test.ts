@@ -24,6 +24,21 @@ describe('đếm ngón trên một bàn tay', () => {
   });
 });
 
+describe('ngón tay chĩa thẳng vào camera', () => {
+  const pitches = [60, 75, 85];
+  const depths = [1, 0.5, 0.3];
+  const cases = pitches.flatMap((pitchDeg) => depths.map((depthScale) => ({ pitchDeg, depthScale })));
+
+  test.each(cases)('3 ngón, ngón cái đè lên ngón út vẫn là 3 ($pitchDeg độ, độ sâu x$depthScale)', (view) => {
+    expect(countHand(makeHand({ ...POSES[3], thumbTucked: true, ...view }))).toBe(3);
+    expect(countHand(makeHand({ ...POSES[3], thumbTucked: true, mirror: true, ...view }))).toBe(3);
+  });
+
+  test.each(cases)('các số khác vẫn đúng ($pitchDeg độ, độ sâu x$depthScale)', (view) => {
+    for (const n of [1, 2, 3, 4, 5]) expect(countHand(makeHand({ ...POSES[n], ...view }))).toBe(n);
+  });
+});
+
 describe('đếm trên hai bàn tay', () => {
   test('5 + 2 = 7', () => {
     expect(countFingers([makeHand(POSES[5]), makeHand({ ...POSES[2], mirror: true })])).toBe(7);

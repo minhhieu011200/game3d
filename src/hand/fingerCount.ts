@@ -13,20 +13,25 @@ export type Hand = readonly Point[];
 const WRIST = 0;
 const THUMB = { mcp: 2, ip: 3, tip: 4 };
 const FINGERS = [
-  { mcp: 5, pip: 6, tip: 8 }, // trỏ
-  { mcp: 9, pip: 10, tip: 12 }, // giữa
-  { mcp: 13, pip: 14, tip: 16 }, // áp út
-  { mcp: 17, pip: 18, tip: 20 }, // út
+  { mcp: 5, pip: 6, dip: 7, tip: 8 }, // trỏ
+  { mcp: 9, pip: 10, dip: 11, tip: 12 }, // giữa
+  { mcp: 13, pip: 14, dip: 15, tip: 16 }, // áp út
+  { mcp: 17, pip: 18, dip: 19, tip: 20 }, // út
 ];
 const INDEX_MCP = 5;
 const MIDDLE_MCP = 9;
+const PINKY_MCP = 17;
 
 /** Đầu ngón phải xa cổ tay hơn khớp PIP ít nhất chừng này lần thì coi là duỗi. */
 export const FINGER_RATIO = 1.1;
+/** Ngón duỗi gần như thẳng: khoảng cách gốc đến đầu ngón so với tổng chiều dài các đốt phải đạt chừng này. */
+export const FINGER_STRAIGHT = 0.6;
 /** Đầu ngón cái phải cách gốc ngón trỏ ít nhất chừng này lần cỡ lòng bàn tay. */
 export const THUMB_SPREAD = 0.55;
 /** Góc gập tối đa (độ) ở khớp IP của ngón cái khi duỗi. */
 export const THUMB_MAX_BEND_DEG = 40;
+/** Chiều ngang lòng bàn tay nhân chừng này thì xấp xỉ chiều dọc (cổ tay đến gốc ngón giữa). */
+const PALM_WIDTH_TO_LENGTH = 1.5;
 
 function dist(a: Point, b: Point): number {
   return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -41,19 +46,29 @@ function bendDeg(a: Point, b: Point, c: Point): number {
   return (Math.acos(Math.max(-1, Math.min(1, dot / len))) * 180) / Math.PI;
 }
 
+/** Cỡ lòng bàn tay. Tay chĩa vào camera thì chiều dọc bị co lại, nên lấy thêm chiều ngang (gần như không đổi). */
+function palmSize(h: Hand): number {
+  return Math.max(dist(h[WRIST], h[MIDDLE_MCP]), dist(h[INDEX_MCP], h[PINKY_MCP]) * PALM_WIDTH_TO_LENGTH);
+}
+
 export function isThumbExtended(h: Hand): boolean {
-  const palm = dist(h[WRIST], h[MIDDLE_MCP]);
-  const spread = dist(h[THUMB.tip], h[INDEX_MCP]) / palm;
+  const spread = dist(h[THUMB.tip], h[INDEX_MCP]) / palmSize(h);
   const bend = bendDeg(h[THUMB.mcp], h[THUMB.ip], h[THUMB.tip]);
-  return spread > THUMB_SPREAD && bend < THUMB_MAX_BEND_DEG;
+  // ngón cái gập ngang lòng bàn tay thì đầu ngón hướng về phía ngón út
+  const awayFromPalm = dist(h[THUMB.tip], h[PINKY_MCP]) > dist(h[THUMB.ip], h[PINKY_MCP]);
+  return spread > THUMB_SPREAD && bend < THUMB_MAX_BEND_DEG && awayFromPalm;
+}
+
+function isFingerExtended(h: Hand, f: (typeof FINGERS)[number]): boolean {
+  const wrist = h[WRIST];
+  const length = dist(h[f.mcp], h[f.pip]) + dist(h[f.pip], h[f.dip]) + dist(h[f.dip], h[f.tip]);
+  // độ thẳng không dựa vào cổ tay nên vẫn đúng khi ngón chĩa vào camera
+  const straight = length > 0 && dist(h[f.mcp], h[f.tip]) / length >= FINGER_STRAIGHT;
+  return dist(h[f.tip], wrist) > dist(h[f.pip], wrist) * FINGER_RATIO && straight;
 }
 
 export function extendedFingers(h: Hand): boolean[] {
-  const wrist = h[WRIST];
-  return [
-    isThumbExtended(h),
-    ...FINGERS.map((f) => dist(h[f.tip], wrist) > dist(h[f.pip], wrist) * FINGER_RATIO),
-  ];
+  return [isThumbExtended(h), ...FINGERS.map((f) => isFingerExtended(h, f))];
 }
 
 export function countHand(h: Hand): number {

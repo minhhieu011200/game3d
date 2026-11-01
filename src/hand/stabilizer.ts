@@ -25,8 +25,8 @@ export class FingerStabilizer {
   private locked: number | null = null;
 
   constructor(opts: StabilizerOptions = {}) {
-    this.holdMs = opts.holdMs ?? 1500;
-    this.size = opts.window ?? 8;
+    this.holdMs = opts.holdMs ?? 700;
+    this.size = opts.window ?? 5;
   }
 
   update(raw: number | null, now: number): StabilizerState {

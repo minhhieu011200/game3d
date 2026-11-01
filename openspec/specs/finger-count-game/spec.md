@@ -24,11 +24,11 @@ Trò chơi SHALL luôn hiển thị số ngón đang nhận diện được, kè
 Khi bộ nhận diện chốt một giá trị, trò chơi SHALL so giá trị đó với kết quả đúng. Đúng thì khen, hiện phép tính đầy đủ (ví dụ "9 − 3 = 6") rồi sang câu kế tiếp. Sai thì báo sai, đọc lời động viên và chờ học sinh trả lời lại cùng câu đó.
 
 #### Scenario: Trả lời đúng
-- **WHEN** câu hỏi là 9 − 3 và học sinh giữ 6 ngón 1,5 giây
+- **WHEN** câu hỏi là 9 − 3 và học sinh giữ 6 ngón 0,7 giây
 - **THEN** màn hình hiện "9 − 3 = 6" kèm hiệu ứng đúng, phát lời khen, rồi chuyển sang câu 9 − 4
 
 #### Scenario: Trả lời sai
-- **WHEN** câu hỏi là 9 − 3 và học sinh giữ 5 ngón 1,5 giây
+- **WHEN** câu hỏi là 9 − 3 và học sinh giữ 5 ngón 0,7 giây
 - **THEN** màn hình báo sai, phát "Thử lại nhé!" và vẫn giữ câu 9 − 3
 
 #### Scenario: Không chốt lặp lại

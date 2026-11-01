@@ -11,6 +11,12 @@ export interface HandPose {
   mirror?: boolean;
   /** Xoay cả bàn tay quanh trục z (độ), như khi tay nghiêng. */
   tiltDeg?: number;
+  /** Ngón cái gập ngang lòng bàn tay, đè lên các ngón đang gập. */
+  thumbTucked?: boolean;
+  /** Chúc bàn tay về phía camera quanh trục x (độ): 90 là các ngón chĩa thẳng vào camera. */
+  pitchDeg?: number;
+  /** Co độ sâu z, vì MediaPipe ước lượng thiếu độ sâu khi tay chĩa vào camera. */
+  depthScale?: number;
 }
 
 const p = (x: number, y: number, z = 0): Point => ({ x, y, z });
@@ -29,7 +35,9 @@ export function makeHand(pose: HandPose): Point[] {
   const tMcp = p(0.04, 0.035);
   const thumb = pose.thumb
     ? [cmc, tMcp, p(0.068, 0.05), p(0.093, 0.062)]
-    : [cmc, tMcp, p(0.04, 0.06, -0.01), p(0.015, 0.065, -0.02)];
+    : pose.thumbTucked
+      ? [cmc, tMcp, p(0.02, 0.055, -0.02), p(-0.005, 0.06, -0.03)]
+      : [cmc, tMcp, p(0.04, 0.06, -0.01), p(0.015, 0.065, -0.02)];
   const pts = [
     wrist,
     ...thumb,
@@ -40,7 +48,12 @@ export function makeHand(pose: HandPose): Point[] {
   ];
   const a = ((pose.tiltDeg ?? 0) * Math.PI) / 180;
   const sx = pose.mirror ? -1 : 1;
-  return pts.map(({ x, y, z }) => p((x * Math.cos(a) - y * Math.sin(a)) * sx, x * Math.sin(a) + y * Math.cos(a), z));
+  const b = ((pose.pitchDeg ?? 0) * Math.PI) / 180;
+  const depth = pose.depthScale ?? 1;
+  return pts.map(({ x, y, z }) => {
+    const y2 = x * Math.sin(a) + y * Math.cos(a);
+    return p((x * Math.cos(a) - y * Math.sin(a)) * sx, y2 * Math.cos(b) - z * Math.sin(b), (y2 * Math.sin(b) + z * Math.cos(b)) * depth);
+  });
 }
 
 export const POSES: Record<number, HandPose> = {

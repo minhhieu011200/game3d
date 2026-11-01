@@ -25,15 +25,15 @@ test('tay rung nhẹ: vài khung hình lẻ không làm đổi kết quả', () 
   expect(last.progress).toBeGreaterThan(0.3);
 });
 
-test('giữ đủ 1,5 giây thì chốt đúng một lần', () => {
+test('giữ đủ 0,7 giây thì chốt đúng một lần', () => {
   const s = new FingerStabilizer();
-  const { commits } = feed(s, repeat(6, Math.ceil(2500 / FRAME)));
+  const { commits } = feed(s, repeat(6, Math.ceil(1200 / FRAME)));
   expect(commits).toEqual([6]);
 });
 
 test('chưa đủ thời gian thì chưa chốt', () => {
   const s = new FingerStabilizer();
-  const { commits, last } = feed(s, repeat(6, Math.floor(1200 / FRAME)));
+  const { commits, last } = feed(s, repeat(6, Math.floor(500 / FRAME)));
   expect(commits).toEqual([]);
   expect(last.progress).toBeLessThan(1);
 });

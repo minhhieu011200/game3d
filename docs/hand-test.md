@@ -8,10 +8,13 @@ Chưa thực hiện: việc này cần một người thật giơ tay trước w
 2. Với mỗi số từ 1 đến 10, giơ tay 10 lần (5 lần tay trái hoặc hai tay, 5 lần tay phải hoặc hai tay).
    Ghi số máy hiện ở dòng "Bạn đang giơ".
 3. Làm ở 2 điều kiện: phòng sáng (đèn và cửa sổ) và phòng hơi tối hoặc ngược sáng.
+   Thử thêm tư thế các ngón chĩa thẳng vào camera, nhất là số 3.
 4. Nếu một số nào đó đúng dưới 9/10 lần, chỉnh ngưỡng trong [src/hand/fingerCount.ts](../src/hand/fingerCount.ts):
    - Ngón cái hay bị đếm thừa: tăng `THUMB_SPREAD` (ví dụ 0.55 → 0.65).
    - Ngón cái hay bị bỏ sót: giảm `THUMB_SPREAD` hoặc tăng `THUMB_MAX_BEND_DEG`.
-   - Ngón gập hờ bị đếm là duỗi: tăng `FINGER_RATIO` (ví dụ 1.1 → 1.2).
+   - Ngón gập hờ bị đếm là duỗi: tăng `FINGER_RATIO` (ví dụ 1.1 → 1.2) hoặc `FINGER_STRAIGHT` (ví dụ 0.6 → 0.7).
+   - Ngón duỗi bị bỏ sót khi chĩa vào camera: giảm `FINGER_STRAIGHT`.
+5. Nếu máy hay chốt nhầm trong lúc đang giơ tay, tăng thời gian giữ `holdMs` trong [src/hand/stabilizer.ts](../src/hand/stabilizer.ts) (hiện là 700 ms).
 
 ## Kết quả
 
