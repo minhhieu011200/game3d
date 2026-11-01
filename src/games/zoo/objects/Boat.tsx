@@ -6,7 +6,7 @@ import { autopilot, stepBoat } from '../boat';
 import { boatRuntime } from '../boatRuntime';
 import { WATER_Y } from '../world';
 import { TourKid, type Pose } from '../../../tour/Walkers';
-import { ChibiHead, LifeVest, SKIN } from './Passengers';
+import { AO_DAI, ChibiHead, LifeVest, SKIN } from './Passengers';
 
 /** Bạn nhỏ trên thuyền không bước chân; chỉ quay lại vẫy tay khi thuyền đậu. */
 const kidPose: Pose = { speed: 0, idle: 0 };
@@ -179,9 +179,7 @@ function Oar({ s, yaw, tilt }: { s: number; yaw: React.RefObject<THREE.Group>; t
 
 // ---------- Cô giáo chèo thuyền ----------
 
-const AO_DAI = '#9b6bff';
-
-/** Cô giáo chibi (tóc búi, đeo kính, áo dài tím) ngồi ghế giữa, quay mặt về đuôi thuyền, hai tay cầm cán chèo. */
+/** Cô giáo chibi (tóc dài, kính đen, áo dài xanh, áo phao) ngồi ghế giữa, quay mặt về đuôi thuyền, hai tay cầm cán chèo. */
 function RowingTeacher({ body, arms }: { body: React.RefObject<THREE.Group>; arms: React.RefObject<THREE.Group> }) {
   return (
     <group>
@@ -190,7 +188,7 @@ function RowingTeacher({ body, arms }: { body: React.RefObject<THREE.Group>; arm
         <group key={x}>
           <Tube c="#ffffff" p={[x, 0.02, 0.14]} s={[0.055, 0.28, 0.055]} r={[Math.PI / 2, 0, 0]} />
           <Tube c="#ffffff" p={[x, -0.12, 0.28]} s={[0.05, 0.22, 0.05]} />
-          <Ball c="#ff8fab" p={[x, -0.23, 0.32]} s={[0.05, 0.035, 0.07]} />
+          <Ball c="#23242b" p={[x, -0.23, 0.32]} s={[0.05, 0.035, 0.07]} />
         </group>
       ))}
       <group ref={body}>
@@ -207,7 +205,7 @@ function RowingTeacher({ body, arms }: { body: React.RefObject<THREE.Group>; arm
           ))}
         </group>
         <group position={[0, 0.62, 0]} scale={1.15}>
-          <ChibiHead girl bun glasses />
+          <ChibiHead teacher />
         </group>
       </group>
     </group>

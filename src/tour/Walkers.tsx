@@ -6,7 +6,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ChibiHead, LifeVest, SKIN } from '../games/zoo/objects/Passengers';
 import { ParrotModel } from './Parrot';
-import { Ball, BlobShadow, Box, Capsule, Tube } from '../shared/3d/toon';
+import { Ball, BlobShadow, Box, Capsule, Cone, Tube } from '../shared/3d/toon';
 
 /** Tư thế: tốc độ bước (0 = đứng yên, 1 = đi bình thường) và thời gian đã đứng yên (giây; lâu thì quay lại vẫy tay). */
 export interface Pose {
@@ -71,22 +71,27 @@ function useWalkCycle(l: Limbs, seed: number, waveArm: boolean, pose: Pose) {
 function Leg({ r, x, color, shoe }: { r: React.RefObject<THREE.Group>; x: number; color: string; shoe: string }) {
   return (
     <group ref={r} position={[x, 0.2, 0]}>
-      <Tube c={color} p={[0, -0.09, 0]} s={[0.042, 0.18, 0.042]} />
-      <Ball c={shoe} p={[0, -0.19, 0.03]} s={[0.05, 0.035, 0.07]} />
+      {/* quần ngắn, chân trần, tất trắng và giày thể thao đế trắng */}
+      <Tube c={color} p={[0, -0.035, 0]} s={[0.052, 0.07, 0.052]} />
+      <Tube c={SKIN} p={[0, -0.095, 0]} s={[0.04, 0.09, 0.04]} />
+      <Tube c="#ffffff" p={[0, -0.15, 0]} s={[0.043, 0.04, 0.043]} shadow={false} />
+      <Ball c={shoe} p={[0, -0.176, 0.024]} s={[0.058, 0.034, 0.078]} />
+      <Ball c="#ffffff" p={[0, -0.194, 0.024]} s={[0.06, 0.012, 0.08]} shadow={false} />
     </group>
   );
 }
 
 function Arm({ r, x, sleeve }: { r: React.RefObject<THREE.Group>; x: number; sleeve: string }) {
   return (
-    <group ref={r} position={[x, 0.36, 0]}>
-      <Capsule c={sleeve} p={[0, -0.05, 0]} s={[0.03, 0.045, 0.03]} />
-      <Ball c={SKIN} p={[0, -0.12, 0]} s={0.032} />
+    <group ref={r} position={[x, 0.37, 0]}>
+      <Ball c={sleeve} p={[0, -0.018, 0]} s={[0.04, 0.045, 0.04]} />
+      <Capsule c={SKIN} p={[0, -0.07, 0]} s={[0.027, 0.035, 0.027]} />
+      <Ball c={SKIN} p={[0, -0.125, 0.004]} s={0.036} />
     </group>
   );
 }
 
-/** Bạn học sinh đứng: áo trắng, khăn quàng đỏ, cặp sách sau lưng. */
+/** Bạn học sinh đứng: áo trắng cổ bẻ, khăn quàng đỏ, quần ngắn, giày thể thao, cặp sách có quai đeo. */
 export function WalkingKid({
   girl = false,
   bottom = '#2f5fb3',
@@ -110,23 +115,32 @@ export function WalkingKid({
     <group ref={l.turn}>
       <BlobShadow r={0.32} />
       <group ref={l.body}>
-        <Leg r={l.legL} x={-0.055} color={girl ? SKIN : bottom} shoe="#ffffff" />
-        <Leg r={l.legR} x={0.055} color={girl ? SKIN : bottom} shoe="#ffffff" />
+        <Leg r={l.legL} x={-0.058} color={girl ? SKIN : bottom} shoe={girl ? '#ff7fb0' : '#3f8ce8'} />
+        <Leg r={l.legR} x={0.058} color={girl ? SKIN : bottom} shoe={girl ? '#ff7fb0' : '#3f8ce8'} />
         {girl ? (
-          <Capsule c={bottom} p={[0, 0.24, 0]} s={[0.12, 0.04, 0.1]} />
+          <Capsule c={bottom} p={[0, 0.235, 0]} s={[0.125, 0.04, 0.105]} />
         ) : (
-          <Ball c={bottom} p={[0, 0.22, 0]} s={[0.1, 0.06, 0.08]} />
+          <Ball c={bottom} p={[0, 0.215, 0]} s={[0.108, 0.065, 0.088]} />
         )}
-        <Ball c="#ffffff" p={[0, 0.31, 0]} s={[0.105, 0.11, 0.085]} />
+        <Ball c="#ffffff" p={[0, 0.31, 0]} s={[0.112, 0.112, 0.09]} />
+        {/* cổ áo */}
+        {[-1, 1].map((s) => (
+          <Box key={s} c="#f1f3f7" p={[s * 0.035, 0.39, 0.068]} s={[0.05, 0.022, 0.03]} r={[0.35, 0, s * -0.4]} shadow={false} />
+        ))}
         {/* khăn quàng đỏ */}
-        <Ball c="#e8262c" p={[0, 0.4, 0.02]} s={[0.085, 0.025, 0.075]} shadow={false} />
-        <Box c="#e8262c" p={[0.015, 0.35, 0.085]} s={[0.03, 0.07, 0.01]} r={[0, 0, 0.3]} shadow={false} />
-        {/* cặp sách */}
-        <Box c={bag} p={[0, 0.32, -0.11]} s={[0.15, 0.17, 0.07]} />
-        <Box c="#ffffff" p={[0, 0.36, -0.148]} s={[0.1, 0.03, 0.01]} shadow={false} />
-        <Arm r={l.armL} x={-0.12} sleeve="#ffffff" />
-        <Arm r={l.armR} x={0.12} sleeve="#ffffff" />
-        <group ref={l.head} position={[0, 0.66, 0]}>
+        <Ball c="#e8262c" p={[0, 0.402, 0.018]} s={[0.078, 0.022, 0.07]} shadow={false} />
+        <Cone c="#e8262c" p={[-0.018, 0.345, 0.092]} s={[0.026, 0.095, 0.01]} r={[0, 0, Math.PI + 0.22]} shadow={false} />
+        <Cone c="#d81f27" p={[0.018, 0.345, 0.092]} s={[0.026, 0.095, 0.01]} r={[0, 0, Math.PI - 0.22]} shadow={false} />
+        {/* cặp sách và quai đeo */}
+        <Capsule c={bag} p={[0, 0.335, -0.118]} s={[0.1, 0.06, 0.058]} />
+        <Capsule c="#ffffff" p={[0, 0.3, -0.17]} s={[0.012, 0.05, 0.012]} r={[0, 0, Math.PI / 2]} shadow={false} />
+        <Ball c="#ffd23f" p={[0, 0.385, -0.172]} s={0.014} shadow={false} />
+        {[-1, 1].map((s) => (
+          <Box key={s} c={bag} p={[s * 0.074, 0.335, 0.066]} s={[0.018, 0.13, 0.012]} r={[-0.2, 0, s * 0.08]} shadow={false} />
+        ))}
+        <Arm r={l.armL} x={-0.128} sleeve="#ffffff" />
+        <Arm r={l.armR} x={0.128} sleeve="#ffffff" />
+        <group ref={l.head} position={[0, 0.685, 0]} scale={1.1}>
           <ChibiHead girl={girl} />
         </group>
         {extra}
