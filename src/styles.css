@@ -648,6 +648,16 @@ body,
 .b2-teams .side-right .b2-lane-label {
   right: 196px;
 }
+/* Vào từ cổng: nhãn đội tính vị trí theo cả màn hình nên phải nằm dưới dải cổng; nút của thanh trên đã ở trong dải */
+.in-gate .b2-teams .b2-lane-label {
+  top: 66px;
+}
+.in-gate .b2-teams .side-left .b2-lane-label {
+  left: 12px;
+}
+.in-gate .b2-teams .side-right .b2-lane-label {
+  right: 12px;
+}
 .b2-teams .b2-mode,
 .b2-teams .b2-title,
 .b2-teams .b2-target {
