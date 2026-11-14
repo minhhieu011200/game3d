@@ -460,7 +460,7 @@ const SCREENS: Record<GateId, { accent: string; bg: string; guide: ScreenContent
       title: 'HƯỚNG DẪN',
       head: 'HỒ ẾCH',
       icon: (g) => emoji(g, '🐸 🕊️ 🕯️', 192, 220, 52),
-      lines: ['1. Ếch xuống sông', '2. Cò bay lên trời', '3. Thổi tắt nến', '4. Chọn phép tính'],
+      lines: ['1. Ếch xuống sông', '2. Cò bay lên trời', '3. Trứng nở ra gà con', '4. Chọn phép tính'],
       left: true,
     },
     status: {

@@ -1,15 +1,11 @@
-import { cabinPos, initialObjects, WHEEL } from './layout';
+import { cabinPos, initialObjects } from './layout';
 import {
-  attachToSlot,
   countKind,
   countLine,
   deleteObject,
   equationFor,
   formatEquation,
-  freeSlots,
   moveObject,
-  nearestFreeSlot,
-  toggleCandle,
   zoneAt,
   type ZooObject,
 } from './logic';
@@ -34,11 +30,11 @@ test('tia nhìn xuống chạm đất, tia nhìn lên trời thì không chạm'
   expect(water![1]).toBeCloseTo(WATER_Y, 5);
 });
 
-test('ban đầu: 10 ếch trên bờ, 10 cò trên đất, 10 nến đang cháy', () => {
+test('ban đầu: 10 ếch trên bờ, 10 cò trên đất, không còn nến (bến trứng thay vòng quay)', () => {
   const o = initialObjects();
   expect(countKind(o, 'frog')).toMatchObject({ total: 10, stay: 10, away: 0 });
   expect(countKind(o, 'stork')).toMatchObject({ total: 10, stay: 10, away: 0 });
-  expect(countKind(o, 'candle')).toMatchObject({ total: 10, stay: 10, away: 0 });
+  expect(countKind(o, 'candle').total).toBe(0);
   // ếch ban đầu đứng trên bờ, không nằm trong sông
   for (const f of o.filter((x) => x.kind === 'frog')) expect(isInRiver(f.pos[0], f.pos[2])).toBe(false);
 });
@@ -54,61 +50,6 @@ test('nến ở cabin đỉnh vòng quay vẫn là "trên vòng quay", không ph
   const top = cabinPos(5, 0);
   expect(top[1]).toBeGreaterThan(SKY_Y);
   expect(zoneAt('candle', top, true)).toBe('wheel');
-});
-
-describe('vòng quay nến', () => {
-  test('10 cabin cách đều nhau, cabin thấp nhất vẫn ở trên mặt đất', () => {
-    const ps = Array.from({ length: WHEEL.slots }, (_, i) => cabinPos(i, 0));
-    for (let i = 0; i < ps.length; i++) {
-      const a = ps[i];
-      const b = ps[(i + 1) % ps.length];
-      expect(Math.hypot(a[0] - b[0], a[1] - b[1])).toBeCloseTo((2 * Math.PI * WHEEL.radius) / WHEEL.slots, 1);
-      expect(a[1]).toBeGreaterThan(groundHeight(a[0], a[2]) + 0.3);
-    }
-  });
-
-  test('quay trọn 1 vòng thì cabin về đúng chỗ cũ; cabin ngôi sao thấp nhất và lệch về phía +x', () => {
-    for (let i = 0; i < WHEEL.slots; i++) {
-      const a = cabinPos(i, 0);
-      const b = cabinPos(i, Math.PI * 2);
-      a.forEach((v, k) => expect(b[k]).toBeCloseTo(v, 6));
-    }
-    const star = cabinPos(0, 0);
-    const lowest = Math.min(...Array.from({ length: WHEEL.slots }, (_, i) => cabinPos(i, 0)[1]));
-    expect(star[1]).toBeCloseTo(lowest, 6);
-    expect(star[0]).toBeGreaterThan(WHEEL.x);
-  });
-
-  test('ban đầu: mỗi cabin đúng 1 nến đang cháy', () => {
-    const c = initialObjects().filter((o) => o.kind === 'candle');
-    expect(c.every((o) => o.zone === 'wheel' && o.lit)).toBe(true);
-    expect(new Set(c.map((o) => o.slot))).toEqual(new Set(Array.from({ length: 10 }, (_, i) => i)));
-    expect(freeSlots(initialObjects())).toEqual([]);
-  });
-
-  test('kéo nến ra đất thì cabin trống; thả gần cabin trống thì gắn lại', () => {
-    let o = moveObject(initialObjects(), 'candle-3', [0, groundHeight(0, 10), 10], 'ground');
-    expect(o.find((x) => x.id === 'candle-3')!.slot).toBeUndefined();
-    expect(freeSlots(o)).toEqual([3]);
-    expect(countKind(o, 'candle')).toMatchObject({ total: 10, stay: 10 });
-    const near = cabinPos(3, 0.4);
-    const slot = nearestFreeSlot(o, [near[0] + 0.3, near[1] + 0.6, near[2]], 0.4);
-    expect(slot).toBe(3);
-    o = attachToSlot(o, 'candle-3', slot!);
-    expect(o.find((x) => x.id === 'candle-3')).toMatchObject({ zone: 'wheel', slot: 3 });
-    expect(freeSlots(o)).toEqual([]);
-  });
-
-  test('cabin đã có nến thì không nhận; ở xa mọi cabin trống thì không gắn', () => {
-    const o = moveObject(initialObjects(), 'candle-3', [0, groundHeight(0, 10), 10], 'ground');
-    const full = cabinPos(7, 0);
-    expect(nearestFreeSlot(o, [full[0], full[1] + 0.5, full[2]], 0)).toBeNull();
-  });
-
-  test('đang kéo nến khỏi cabin của nó: cabin đó được coi là trống', () => {
-    const p = cabinPos(4, 0);
-    expect(nearestFreeSlot(initialObjects(), [p[0], p[1] + 0.5, p[2]], 0, 1.2, 'candle-4')).toBe(4);
-  });
 });
 
 test('ếch thả xuống sông: trên bờ giảm 1, dưới sông tăng 1', () => {
@@ -138,15 +79,6 @@ test('cò kéo lên trời thì được đếm là bay đi', () => {
 test('xóa một con ếch thì tổng giảm 1', () => {
   const o = deleteObject(initialObjects(), 'frog-3');
   expect(countKind(o, 'frog').total).toBe(9);
-});
-
-test('tắt 3 ngọn nến: 7 đang cháy, 3 đã tắt; bấm lại thì cháy lại', () => {
-  let o = initialObjects();
-  for (const id of ids(o, 'candle').slice(0, 3)) o = toggleCandle(o, id);
-  expect(countKind(o, 'candle')).toMatchObject({ stay: 7, away: 3 });
-  expect(countLine('candle', countKind(o, 'candle'))).toBe('Đang cháy: 7 · Đã tắt: 3 · Tất cả: 10');
-  o = toggleCandle(o, 'candle-0');
-  expect(countKind(o, 'candle').away).toBe(2);
 });
 
 test('đặt lại cảnh: về đủ 10 mỗi loại', () => {

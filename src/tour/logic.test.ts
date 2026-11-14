@@ -21,7 +21,7 @@ test('thứ tự và tên cổng theo câu chuyện', () => {
     ['Vườn Hoa Bướm Xinh', 1, 'flower'],
     ['Đồng Cỏ Thỏ Nhảy Cà Rốt', 2, 'bunny'],
     ['Trạm Soát Vé Bàn Tay Thần Kỳ', 3, 'finger'],
-    ['Hồ Ếch & Vòng Quay Ánh Nến', 4, 'zoo'],
+    ['Ếch Nhảy, Cò Bay, Trứng Nở', 4, 'zoo'],
   ]);
   expect(STATIONS[0].id).toBe('start');
   expect(STATIONS[SQUARE].title).toBe('Quảng Trường Huy Hiệu');

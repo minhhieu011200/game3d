@@ -64,10 +64,10 @@ export const STATIONS: readonly Station[] = [
   },
   {
     id: 'pond',
-    title: 'Hồ Ếch & Vòng Quay Ánh Nến',
+    title: 'Ếch Nhảy, Cò Bay, Trứng Nở',
     lesson: 4,
     screen: 'zoo',
-    speech: 'Khu cuối cùng có hồ ếch, đàn cò và vòng quay ánh nến. Bạn nào đếm giỏi nhất nào?',
+    speech: 'Khu cuối cùng có hồ ếch, đàn cò và ổ trứng của cô gà mái. Bạn nào đếm giỏi nhất nào?',
     t: 0.8,
     color: '#3498db',
     emoji: '🐸',

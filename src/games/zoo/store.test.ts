@@ -28,9 +28,17 @@ test('bấm Bay: 2 bạn cò cùng lúc bay lên trời', () => {
 test('bấm Đáp án chỉ hiện đáp án của bến đó, không tính là qua cổng; đặt lại thì về như cũ', () => {
   useZoo.getState().act('frog');
   useZoo.getState().showAnswer('frog');
-  expect(useZoo.getState().answered).toEqual({ frog: true, stork: false });
+  expect(useZoo.getState().answered).toEqual({ frog: true, stork: false, egg: false });
   expect(useTour.getState()).toMatchObject({ done: false, recapOpen: false });
   useZoo.getState().reset();
-  expect(useZoo.getState()).toMatchObject({ acted: { frog: false, stork: false }, answered: { frog: false, stork: false } });
+  expect(useZoo.getState()).toMatchObject({ acted: { frog: false, stork: false, egg: false }, answered: { frog: false, stork: false, egg: false } });
   expect(countKind(useZoo.getState().objects, 'frog').away).toBe(0);
+});
+
+test('bấm Nở: trứng nở (EggNest đọc acted.egg), không đụng tới ếch và cò', () => {
+  useZoo.getState().act('egg');
+  expect(useZoo.getState().acted.egg).toBe(true);
+  expect(countKind(useZoo.getState().objects, 'frog').away).toBe(0);
+  expect(countKind(useZoo.getState().objects, 'stork').away).toBe(0);
+  expect(ACTIONS.egg.count).toBe(3);
 });

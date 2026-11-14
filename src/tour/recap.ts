@@ -28,7 +28,7 @@ export interface RecapData {
   columns: RecapColumn[];
 }
 
-export const KIND_ICON = { frog: '🐸', stork: '🕊️', candle: '🕯️' } as const;
+export const KIND_ICON = { frog: '🐸', stork: '🕊️', candle: '🕯️', egg: '🐣' } as const;
 
 /** Bảng toàn "?" từ bộ câu hỏi cố định của bài, dùng khi trò chơi chưa báo gì. */
 export function defaultRecap(gate: GateId): RecapData {
@@ -44,6 +44,7 @@ export function defaultRecap(gate: GateId): RecapData {
             rows: [
               { a: 10, b: 5, done: false, icon: KIND_ICON.frog },
               { a: 10, b: 2, done: false, icon: KIND_ICON.stork },
+              { a: 10, b: 3, done: false, icon: KIND_ICON.egg },
             ],
           },
         ],

@@ -16,7 +16,7 @@ CHUYẾN THAM QUAN "VƯỜN THÚ SỐ VUI"
     Cổng 1 – Vườn Hoa Bướm Xinh            → Bài 1
     Cổng 2 – Đồng Cỏ Thỏ Nhảy Cà Rốt       → Bài 2
     Cổng 3 – Trạm Soát Vé Bàn Tay Thần Kỳ  → Bài 3 (giơ ngón tay)
-    Cổng 4 – Hồ Ếch & Vòng Quay Ánh Nến    → Bài 4
+    Cổng 4 – Ếch Nhảy, Cò Bay, Trứng Nở    → Bài 4
   Đi hết 4 cổng là tới Quảng Trường Huy Hiệu: cả lớp nhận huy hiệu "Nhà thám hiểm Phép Trừ nhí".
 
   Cô điều khiển bằng các nút:
@@ -63,9 +63,11 @@ CÁC BÀI
      • Tới "Bến ếch" thì có nút "🐸 Nhảy": bấm vào, 5 bạn ếch cùng nhảy xuống hồ. Khung bên
        phải có nút "Đáp án": bấm để hiện 10 − 5 = 5.
      • Tới "Bến cò" thì có nút "🕊️ Bay": bấm vào, 2 bạn cò cùng bay lên trời; "Đáp án" hiện
-       10 − 2 = 8. Bấm "Đáp án" không tự qua cổng: xong cả hai bến thì bấm "Qua cổng".
-     • Vẫn kéo được ếch, cò và bấm nến để thổi tắt.
-     • Học sinh: làm theo nhiệm vụ (thuyền tự đưa tới bến), rồi chọn phép tính đúng.
+       10 − 2 = 8.
+     • Tới "Bến trứng" (gà mái và 10 quả trứng) thì có nút "🐣 Nở": bấm vào, 3 quả trứng nở
+       ra gà con; "Đáp án" hiện 10 − 3 = 7.
+     • Bấm "Đáp án" không tự qua cổng: xong các bến thì bấm "Qua cổng".
+     • Vẫn kéo được ếch, cò bằng chuột.
 
 CAMERA
   Lần đầu vào Bài 3, trình duyệt sẽ hỏi quyền dùng camera: bấm "Cho phép".

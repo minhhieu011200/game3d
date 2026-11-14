@@ -21,10 +21,10 @@ describe('bảng mặc định (chưa chơi)', () => {
   test('Cổng 2: 5 phép 6 − 1 … 6 − 5', () => {
     expect(eqs(defaultRecap('flower'))).toEqual(['6-1?', '6-2?', '6-3?', '6-4?', '6-5?']);
   });
-  test('Bài 4: hai dòng 🐸 10 − 5 và 🕊️ 10 − 2, chưa làm', () => {
+  test('Bài 4: ba dòng 🐸 10 − 5, 🕊️ 10 − 2, 🐣 10 − 3, chưa làm', () => {
     const r = defaultRecap('pond');
-    expect(eqs(r)).toEqual(['10-5?', '10-2?']);
-    expect(rows(r).map((x) => x.icon)).toEqual(['🐸', '🕊️']);
+    expect(eqs(r)).toEqual(['10-5?', '10-2?', '10-3?']);
+    expect(rows(r).map((x) => x.icon)).toEqual(['🐸', '🕊️', '🐣']);
   });
   test('Cổng 3: chưa có ô nào thì ghi "Chưa chơi"', () => {
     expect(defaultRecap('bunny').columns[0]).toEqual({ rows: [], note: 'Chưa chơi' });
@@ -93,9 +93,9 @@ describe('Bài 2 (thỏ)', () => {
 });
 
 describe('Bài 4 (vườn thú)', () => {
-  test('hai dòng 🐸 10 − 5 và 🕊️ 10 − 2: mỗi dòng xong khi đã bấm Đáp án của bến đó', () => {
-    expect(eqs(zooRecap({ frog: false, stork: false }))).toEqual(['10-5?', '10-2?']);
-    expect(eqs(zooRecap({ frog: true, stork: false }))).toEqual(['10-5', '10-2?']);
-    expect(rows(zooRecap({ frog: true, stork: true })).map((x) => x.icon)).toEqual(['🐸', '🕊️']);
+  test('ba dòng 🐸 10 − 5, 🕊️ 10 − 2, 🐣 10 − 3: mỗi dòng xong khi đã bấm Đáp án của bến đó', () => {
+    expect(eqs(zooRecap({ frog: false, stork: false, egg: false }))).toEqual(['10-5?', '10-2?', '10-3?']);
+    expect(eqs(zooRecap({ frog: true, stork: false, egg: true }))).toEqual(['10-5', '10-2?', '10-3']);
+    expect(rows(zooRecap({ frog: true, stork: true, egg: true })).map((x) => x.icon)).toEqual(['🐸', '🕊️', '🐣']);
   });
 });

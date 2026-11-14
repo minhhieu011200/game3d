@@ -1,6 +1,6 @@
 // Chuyển động của thuyền: hàm thuần, cảnh 3D gọi mỗi khung hình.
 import { clampBoat, riverCenterZ, riverHeading, RIVER_HALF_WIDTH } from './world';
-import { WHEEL, ZONES } from './layout';
+import { NEST, ZONES } from './layout';
 
 export interface BoatState {
   x: number;
@@ -46,9 +46,8 @@ export const DOCKS: Dock[] = [
   { id: 'frogs', label: '🐸 Bến ếch', x: frogX, look: [frogX, riverCenterZ(frogX) + RIVER_HALF_WIDTH + 2], polar: 0.95 },
   // nhìn gần ngang để thấy cả bầu trời khi các bạn cò bay lên (không giữ góc nhìn từ cao của bến ếch)
   { id: 'storks', label: '🕊️ Bến cò', x: storkX, look: [storkX, riverCenterZ(storkX) - RIVER_HALF_WIDTH - 3], polar: 1.3 },
-  { id: 'animals', label: '🦌 Bến thú', x: (ZONES.animals.x0 + ZONES.animals.x1) / 2 },
-  // vòng quay nến ở cuối sông
-  { id: 'candles', label: '🎡 Bến nến', x: WHEEL.x, look: [WHEEL.x, WHEEL.z], lookY: WHEEL.hubY - 1.2, polar: 1.32 },
+  // bến trứng ở cuối sông (chỗ vòng quay nến cũ): gà mái và ổ 10 quả trứng trên bờ
+  { id: 'eggs', label: '🥚 Bến trứng', x: NEST.x, look: [NEST.x, NEST.z], polar: 0.95 },
 ];
 
 export function dockById(id: string) {

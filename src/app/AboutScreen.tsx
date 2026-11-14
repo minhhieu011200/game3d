@@ -7,7 +7,7 @@ export function AboutScreen() {
       <p>
         Bộ trò chơi luyện tập Bài 11 "Phép trừ trong phạm vi 10", SGK Toán 1 tập 1, trang 72–73, dẫn dắt bằng chuyến
         tham quan "Vườn Thú Số Vui" qua 4 cổng: Trạm Soát Vé Bàn Tay Thần Kỳ (Bài 3), Vườn Hoa Bướm Xinh (Bài 1), Đồng
-        Cỏ Thỏ Nhảy Cà Rốt (Bài 2) và Hồ Ếch &amp; Vòng Quay Ánh Nến (Bài 4). Ứng dụng chạy hoàn
+        Cỏ Thỏ Nhảy Cà Rốt (Bài 2) và Ếch Nhảy, Cò Bay, Trứng Nở (Bài 4). Ứng dụng chạy hoàn
         toàn trên máy, không cần mạng. Hình ảnh camera chỉ được xử lý trên máy, không lưu và không gửi đi đâu.
       </p>
       <h2>Ghi nguồn tài nguyên</h2>

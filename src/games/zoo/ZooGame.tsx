@@ -204,7 +204,7 @@ export default function ZooGame() {
       <SelectionBar />
       <DrivePad />
       <div className="zoo-help">
-        Lái thuyền: W A S D, phím mũi tên hoặc nút ▲◀▼▶ · Bấm bến để thuyền tự chạy · Kéo chuột để xoay · Kéo con vật để di chuyển · Bấm nến để thổi tắt
+        Lái thuyền: W A S D, phím mũi tên hoặc nút ▲◀▼▶ · Bấm bến để thuyền tự chạy · Kéo chuột để xoay · Kéo con vật để di chuyển
       </div>
     </div>
   );

@@ -11,9 +11,11 @@ import { riverCenterZ, RIVER_HALF_WIDTH, SKY_Y, WATER_Y } from './world';
 export const ACTIONS = {
   frog: { dock: 'frogs', count: 5, label: '🐸 Nhảy' },
   stork: { dock: 'storks', count: 2, label: '🕊️ Bay' },
+  // trứng không phải vật kéo thả: EggNest đọc `acted.egg` để cho 3 quả nở ra gà con
+  egg: { dock: 'eggs', count: 3, label: '🐣 Nở' },
 } as const;
 export type ActKind = keyof typeof ACTIONS;
-const NONE: Record<ActKind, boolean> = { frog: false, stork: false };
+const NONE: Record<ActKind, boolean> = { frog: false, stork: false, egg: false };
 
 interface ZooStore {
   objects: ZooObject[];
@@ -32,7 +34,7 @@ interface ZooStore {
   dropOnWheel(id: string, slot: number): void;
   remove(id: string): void;
   toggleCandle(id: string): void;
-  /** Bến ếch: 5 bạn ếch cùng nhảy xuống hồ; bến cò: 2 bạn cò cùng bay lên trời. */
+  /** Bến ếch: 5 bạn ếch cùng nhảy xuống hồ; bến cò: 2 bạn cò cùng bay lên trời; bến trứng: 3 quả trứng nở. */
   act(kind: ActKind): void;
   /** Hiện phép tính đáp án của bến (không tính là qua cổng). */
   showAnswer(kind: ActKind): void;

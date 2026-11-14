@@ -34,7 +34,7 @@ test('tới cổng 1: có nút Vào cổng', () => {
 test('bản đồ nhảy tới Cổng 4 mà không đánh dấu các cổng trước', () => {
   render(<TourScreen />);
   fireEvent.click(screen.getByText(/Bản đồ/));
-  fireEvent.click(screen.getByText('Bài 4: Hồ Ếch & Vòng Quay Ánh Nến'));
+  fireEvent.click(screen.getByText('Bài 4: Ếch Nhảy, Cò Bay, Trứng Nở'));
   expect(useTour.getState()).toMatchObject({ at: 4, phase: 'moving', passed: [] });
   act(() => useTour.getState().arrive());
   expect(screen.getByText(/Vào cổng/)).toBeTruthy();

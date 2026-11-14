@@ -52,12 +52,17 @@ export function cabinPos(slot: number, angle: number): [number, number, number] 
   return [x, y - WHEEL.hang, z];
 }
 
-/** Hộp bao vòng quay trên mặt đất (để không trồng cây chồng lên). */
+/** Tâm ổ trứng (bến trứng): lùi khỏi mép sông để cả ổ và hàng rào nằm trên bờ. */
+export const NEST = { x: WHEEL.x, z: WHEEL.z + 4.2 };
+/** Nửa bề ngang, mép trước (phía sông) và mép sau của hàng rào ổ trứng, tính từ NEST. */
+export const NEST_FENCE = { half: 5.6, front: -4.9, back: 3.9 };
+
+/** Hộp bao hàng rào ổ trứng trên mặt đất (để không trồng cây, hoa chồng lên). */
 export function nearWheel(x: number, z: number, pad = 0) {
-  return Math.abs(x - WHEEL.x) < WHEEL.radius + 1.5 + pad && Math.abs(z - WHEEL.z) < 4 + pad;
+  return Math.abs(x - NEST.x) < NEST_FENCE.half + pad && z > NEST.z + NEST_FENCE.front - pad && z < NEST.z + NEST_FENCE.back + pad;
 }
 
-/** Trạng thái ban đầu: 10 ếch trên bờ nam, 10 cò trên bờ bắc, 10 nến đang cháy, mỗi cabin vòng quay một ngọn. */
+/** Trạng thái ban đầu: 10 ếch trên bờ nam, 10 cò trên bờ bắc. Bến trứng (chỗ vòng quay cũ) vẽ riêng ở EggNest. */
 export function initialObjects(): ZooObject[] {
   const out: ZooObject[] = [];
   const { frogs, storks } = ZONES;
@@ -71,9 +76,6 @@ export function initialObjects(): ZooObject[] {
     const x = storks.x0 + (i % 5) * 2.4 + row * 1.2;
     const z = riverCenterZ(x) - ON_BANK - row * 2.2;
     out.push({ id: `stork-${i}`, kind: 'stork', zone: 'ground', pos: [x, groundHeight(x, z), z], deleted: false, lit: true });
-  }
-  for (let i = 0; i < INITIAL_PER_KIND; i++) {
-    out.push({ id: `candle-${i}`, kind: 'candle', zone: 'wheel', slot: i, pos: cabinPos(i, 0), deleted: false, lit: true });
   }
   return out;
 }

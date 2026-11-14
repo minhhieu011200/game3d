@@ -1,7 +1,7 @@
 import { useThree } from '@react-three/fiber';
 import { boatRuntime } from './boatRuntime';
 import { ZooControls } from './controls/ZooControls';
-import { cabinPos, WHEEL, ZONES } from './layout';
+import { cabinPos, NEST, NEST_FENCE, ZONES } from './layout';
 import { Boat } from './objects/Boat';
 import { Outlined } from '../../shared/3d/toon';
 import { Candle, Frog, Stork } from './objects/Models';
@@ -12,7 +12,8 @@ import { Effects } from './scene/Effects';
 import { CartoonSky, FOG_COLOR, LIGHT_DIR } from './scene/Sky';
 import { Grass, Wildflowers } from './scene/Grass';
 import { Pond } from './scene/Pond';
-import { AreaSign, FerrisWheel, Gate } from './scene/Structures';
+import { AreaSign, Gate } from './scene/Structures';
+import { EggNest } from './scene/EggNest';
 import { Terrain } from './scene/Terrain';
 import { Bushes, Butterflies, Trees } from './scene/Vegetation';
 import { useZoo } from './store';
@@ -93,11 +94,11 @@ export function ZooScene() {
       <Bushes />
       <Butterflies />
       <Gate />
-      <FerrisWheel />
+      <EggNest />
       <AnimalPens />
       <AreaSign at={[ZONES.frogs.x0 - 1.5, south(ZONES.frogs.x0 - 1.5, 2.6)]} text="🐸 Khu ếch" />
       <AreaSign at={[ZONES.storks.x0 - 1.8, north(ZONES.storks.x0 - 1.8, 2.4)]} text="🕊️ Khu cò" />
-      <AreaSign at={[WHEEL.x + WHEEL.radius + 2.6, WHEEL.z - 2.4]} text="🎡 Vòng quay" />
+      <AreaSign at={[NEST.x - NEST_FENCE.half + 1.2, NEST.z + NEST_FENCE.front - 0.9]} text="🥚 Khu trứng" />
       <Countables />
       <Boat />
       <Effects />

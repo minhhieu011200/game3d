@@ -1,5 +1,5 @@
 import { autopilot, boatAt, DOCKS, MAX_SPEED, stepBoat, type BoatState } from './boat';
-import { initialObjects, WHEEL } from './layout';
+import { initialObjects, NEST } from './layout';
 import { BOAT_X_RANGE, isInRiver, riverCenterZ, riverHeading, RIVER_HALF_WIDTH } from './world';
 
 const NONE = { forward: false, back: false, left: false, right: false };
@@ -58,5 +58,5 @@ test('tự chạy xuôi dòng tới bến: mũi thuyền vẫn hướng xuôi d�
 test('các khu đều ở sát bờ: từ giữa dòng nhìn ra không quá 14 m', () => {
   const near = (x: number, z: number) => Math.abs(z - riverCenterZ(x)) < 14;
   for (const o of initialObjects()) expect(near(o.pos[0], o.pos[2])).toBe(true);
-  expect(near(WHEEL.x, WHEEL.z)).toBe(true);
+  expect(near(NEST.x, NEST.z)).toBe(true);
 });
