@@ -11,9 +11,9 @@ export function BackButton() {
   );
 }
 
-/** Nút chất lượng đồ họa (chỉ cho cảnh 3D) và bật/tắt tiếng. */
+/** Nút chất lượng đồ họa (chỉ cho cảnh 3D). */
 export function TopBarRight() {
-  const { muted, toggleMute, quality, setQuality, screen } = useApp();
+  const { quality, setQuality, screen } = useApp();
   return (
     <div className="topbar-right">
       {(screen === 'zoo' || screen === 'tour') && (
@@ -21,9 +21,6 @@ export function TopBarRight() {
           🎨 Chất lượng: {quality === 'high' ? 'Cao' : 'Thấp'}
         </button>
       )}
-      <button className="btn btn-small" onClick={toggleMute} aria-label={muted ? 'Bật tiếng' : 'Tắt tiếng'}>
-        {muted ? '🔇 Đang tắt tiếng' : '🔊 Đang bật tiếng'}
-      </button>
     </div>
   );
 }

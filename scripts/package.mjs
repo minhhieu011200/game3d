@@ -1,4 +1,4 @@
-// Đóng gói bản chạy offline: TroChoiToan1/{start.bat, server.ps1, HUONG-DAN.txt, game/}
+// Đóng gói bản chạy offline: TroChoiToan1/{start.bat, HUONG-DAN.txt, game/}
 // Dùng: npm run package   (đã gồm bước build)
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,7 +12,7 @@ if (!existsSync('dist/index.html')) {
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT);
 cpSync('dist', join(OUT, 'game'), { recursive: true });
-cpSync('release/server.ps1', join(OUT, 'server.ps1'));
+// start.bat tự chứa máy chủ (PowerShell) và tự tìm thư mục game, nên chép đi đâu cũng chạy được.
 // .bat phải dùng xuống dòng kiểu Windows (CRLF)
 const bat = readFileSync('release/start.bat', 'utf8').replace(/\r?\n/g, '\r\n');
 writeFileSync(join(OUT, 'start.bat'), bat);

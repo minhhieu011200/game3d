@@ -1,30 +1,13 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { audio } from '../../audio/AudioManager';
 import { useQuality } from '../../shared/3d/quality';
-import { DOCKS, type BoatInput } from './boat';
+import { dockById, DOCKS, type BoatInput } from './boat';
 import { boatRuntime } from './boatRuntime';
-import { countKind, countLine, equationFor, formatEquation, KIND_LABELS, KINDS } from './logic';
 import { SKY_BAND } from './objects/Draggable';
-import { useZoo } from './store';
-import { PassGateButton } from '../../tour/gateBridge';
-import { TASKS, taskProgress } from './tasks';
+import { ACTIONS, useZoo, type ActKind } from './store';
+import { reportRecap } from '../../tour/gateBridge';
+import { zooRecap } from './recap';
 import { ZooScene } from './ZooScene';
-
-/** Thanh trên cùng: đặt lại và bật/tắt bảng đếm (cho giáo viên xem đáp án khi cần). */
-function ModeBar({ board, toggleBoard }: { board: boolean; toggleBoard(): void }) {
-  const reset = useZoo((s) => s.reset);
-  return (
-    <div className="zoo-modebar wood-panel">
-      <button className={`btn btn-small ${board ? 'active' : ''}`} onClick={toggleBoard}>
-        📋 Bảng đếm
-      </button>
-      <button className="btn btn-small" onClick={reset}>
-        🔄 Đặt lại
-      </button>
-    </div>
-  );
-}
 
 /** Nút bến: bấm là thuyền tự chạy tới. */
 function Destinations() {
@@ -100,102 +83,51 @@ function DrivePad() {
   );
 }
 
-function TeacherBoard() {
-  const objects = useZoo((s) => s.objects);
-  const revealed = useZoo((s) => s.revealed);
-  const reveal = useZoo((s) => s.reveal);
-  return (
-    <div className="zoo-board wood-panel">
-      <h3>Bảng đếm</h3>
-      {KINDS.map((k) => {
-        const c = countKind(objects, k);
-        return (
-          <div key={k} className="zoo-board-row">
-            <div className="zoo-board-head">
-              <b>{KIND_LABELS[k].name}</b>
-              <button className="btn btn-small" onClick={() => reveal(k)}>
-                {revealed[k] ? 'Ẩn' : 'Hiện đáp án'}
-              </button>
-            </div>
-            {revealed[k] && (
-              <div className="pop-in">
-                <div>{countLine(k, c)}</div>
-                <div className="zoo-eq">{formatEquation(equationFor(c))}</div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+const ACT_KINDS = Object.keys(ACTIONS) as ActKind[];
+
+/** Bến đang đậu có nút hành động (ếch / cò); đọc trạng thái thuyền vài lần mỗi giây, vì thuyền chạy ngoài React. */
+function useDockedAction(): ActKind | null {
+  const [kind, setKind] = useState<ActKind | null>(null);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const docked = boatRuntime.target === null ? ACT_KINDS.find((k) => boatRuntime.focus === dockById(ACTIONS[k].dock).look) : undefined;
+      setKind(docked ?? null);
+    }, 200);
+    return () => window.clearInterval(id);
+  }, []);
+  return kind;
 }
 
-function StudentPanel() {
-  const student = useZoo((s) => s.student);
-  const objects = useZoo((s) => s.objects);
-  const hint = useZoo((s) => s.hint);
-  const answer = useZoo((s) => s.answer);
-  const reset = useZoo((s) => s.reset);
-
-  if (student.phase === 'done') {
-    return (
-      <div className="overlay">
-        <div className="overlay-box wood-panel pop-in">
-          <h2>🎉 Hoan hô!</h2>
-          <p>Bạn đã hoàn thành chuyến tham quan vườn thú!</p>
-          <div className="zoo-done-eqs">
-            <div>🐸 10 − 2 = 8</div>
-            <div>🕊️ 10 − 5 = 5</div>
-            <div>🕯️ 10 − 3 = 7</div>
-          </div>
-          <div className="overlay-actions">
-            <button className="btn btn-big" onClick={reset}>
-              🔁 Chơi lại
-            </button>
-            <PassGateButton />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const task = TASKS[student.taskIndex];
-  const p = taskProgress(task, objects);
+/** Ở bến ếch / bến cò: nút "Nhảy" / "Bay"; bấm xong thì khung "Đáp án" bên phải hiện phép tính 10 − n. */
+function ActionPanel() {
+  const kind = useDockedAction();
+  const acted = useZoo((s) => s.acted);
+  const answered = useZoo((s) => s.answered);
+  const act = useZoo((s) => s.act);
+  const showAnswer = useZoo((s) => s.showAnswer);
+  if (!kind) return null;
+  const n = ACTIONS[kind].count;
   return (
-    <div className="zoo-task wood-panel">
-      <div className="zoo-task-step">
-        Nhiệm vụ {student.taskIndex + 1} / {TASKS.length}
-      </div>
-      {student.phase === 'doing' ? (
-        <>
-          <div className="zoo-task-prompt">{task.prompt}</div>
-          {hint ? (
-            <div className="zoo-hint">{hint}</div>
-          ) : (
-            p.kind === 'not-enough' && <div className="zoo-task-left">Còn {p.left} nữa</div>
-          )}
-          <button className="btn btn-small" onClick={() => audio.say(task.voice.task, { interrupt: true })}>
-            🔊 Nghe lại
-          </button>
-        </>
-      ) : (
-        <>
-          <div className="zoo-task-prompt">{task.question}</div>
-          <div className="zoo-choices">
-            {student.choices.map((c) => (
-              <button
-                key={c}
-                className={`btn zoo-choice ${student.wrongChoices.includes(c) ? 'wrong' : ''}`}
-                disabled={student.wrongChoices.includes(c)}
-                onClick={() => answer(c)}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </>
+    <>
+      {!acted[kind] && (
+        <button className="btn btn-big btn-primary zoo-jump pop-in" onClick={() => act(kind)}>
+          {ACTIONS[kind].label}
+        </button>
       )}
-    </div>
+      {acted[kind] && (
+        <div className="zoo-answer wood-panel pop-in">
+          {answered[kind] ? (
+            <div className="zoo-answer-eq pop-in">
+              10 − {n} = {10 - n}
+            </div>
+          ) : (
+            <button className="btn btn-big" onClick={() => showAnswer(kind)}>
+              Đáp án
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -242,12 +174,17 @@ if (import.meta.env.DEV) (window as unknown as { __zoo: typeof useZoo }).__zoo =
 
 export default function ZooGame() {
   const q = useQuality();
-  const [board, setBoard] = useState(false);
   const reset = useZoo((s) => s.reset);
   useEffect(() => {
     reset();
-    return () => audio.stop();
   }, [reset]);
+  // bảng phép tính hiện trong popup khi qua cổng: báo ngay lúc mở và khi hiện đáp án
+  useEffect(() => {
+    reportRecap(zooRecap(useZoo.getState().answered));
+    return useZoo.subscribe((s, prev) => {
+      if (s.answered !== prev.answered) reportRecap(zooRecap(s.answered));
+    });
+  }, []);
 
   return (
     <div className="game zoo">
@@ -262,9 +199,8 @@ export default function ZooGame() {
         </Suspense>
       </Canvas>
       <SkyDropZone />
-      <ModeBar board={board} toggleBoard={() => setBoard((b) => !b)} />
       <Destinations />
-      {board ? <TeacherBoard /> : <StudentPanel />}
+      <ActionPanel />
       <SelectionBar />
       <DrivePad />
       <div className="zoo-help">

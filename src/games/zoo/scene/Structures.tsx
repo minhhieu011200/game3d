@@ -7,8 +7,6 @@ import { Ball, Box, Cone, Tube, toon } from '../../../shared/3d/toon';
 import { dockById } from '../boat';
 import { boatRuntime } from '../boatRuntime';
 import { CABIN_FRONT, cabinPos, WHEEL, ZONES } from '../layout';
-import { useZoo } from '../store';
-import { TASKS } from '../tasks';
 import { stepWheel, wheelRuntime } from '../wheelRuntime';
 import { groundHeight, riverCenterZ, riverHeading, RIVER_HALF_WIDTH } from '../world';
 
@@ -172,13 +170,10 @@ export function FerrisWheel() {
 
   // ưu tiên âm: chạy trước các vật khác để nến đọc được góc mới của khung hình này
   useFrame((_, dt) => {
-    const st = useZoo.getState();
-    const task = TASKS[st.student.taskIndex];
-    const candleTask = st.student.phase !== 'done' && task?.kind === 'candle';
     const f = boatRuntime.focus;
     const docked = boatRuntime.target === null && f !== null && f[0] === candleLook[0] && f[1] === candleLook[1];
     const touched = performance.now() / 1000 < wheelRuntime.touchedUntil;
-    const next = stepWheel(wheelRuntime, Math.min(dt, 0.1), candleTask || docked || touched);
+    const next = stepWheel(wheelRuntime, Math.min(dt, 0.1), docked || touched);
     wheelRuntime.angle = next.angle;
     wheelRuntime.speed = next.speed;
     if (rim.current) rim.current.rotation.z = next.angle;

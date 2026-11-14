@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
-import { audio } from '../../audio/AudioManager';
+import { useApp } from '../../app/store';
 import { BunnyBoard, formatTime } from './BunnyBoard';
 import { TARGETS } from './levels';
 import { allArrived, TEAMS } from './logic';
 import { useBunny } from './store';
-import { PassGateButton } from '../../tour/gateBridge';
+import { PassGateButton, reportRecap } from '../../tour/gateBridge';
+import { bunnyRecap } from './recap';
 
 /** Hiện khi mọi thỏ đã vào hàng rào: hai đội thì xếp hạng theo thời gian về đích. */
 function FinishOverlay() {
   const s = useBunny();
-  if (!allArrived(s) || s.winner === null) return null;
+  const fromGate = useApp((a) => a.gate !== null);
+  // chơi từ cổng thì popup bảng phép tính thay cho bảng này, để không đè nhau
+  if (fromGate || !allArrived(s) || s.winner === null) return null;
   const lane = s.lanes[0];
   const order = s.lanes.map((_, i) => i).sort((a, b) => (s.times[a] ?? Infinity) - (s.times[b] ?? Infinity));
   return (
@@ -120,8 +123,13 @@ export default function BunnyGame() {
   const restart = useBunny((s) => s.restart);
   useEffect(() => {
     restart();
-    return () => audio.stop();
   }, [restart]);
+  // bảng phép tính hiện trên đường đi sau khi qua cổng: báo ngay lúc mở và mỗi khi trạng thái đổi
+  useEffect(() => {
+    const push = (s: ReturnType<typeof useBunny.getState>) => reportRecap(bunnyRecap(s.levels, s.lanes, s.mode));
+    push(useBunny.getState());
+    return useBunny.subscribe(push);
+  }, []);
 
   const mode = useBunny((s) => s.mode);
   return (

@@ -1,14 +1,14 @@
 import { BackButton, TopBarRight } from '../app/TopBar';
 import { gateNumber, STATIONS, type GateId } from './logic';
-import { passGate } from './gateBridge';
 import { useTour } from './store';
 
 export const TICKET_LIGHTS = 8;
 
-/** Dải cổng phía trên trò chơi: tên cổng, nút "Qua cổng"; Cổng 1 có thêm thanh chắn và 8 đèn soát vé. */
+/** Dải cổng phía trên trò chơi: tên cổng, nút "Qua cổng"; trạm soát vé (Bài 3) có thêm thanh chắn và 8 đèn soát vé. */
 export function GateBanner({ gate }: { gate: GateId }) {
   const progress = useTour((s) => s.progress);
   const done = useTour((s) => s.done);
+  const openRecap = () => useTour.getState().setRecapOpen(true);
   const st = STATIONS.find((s) => s.id === gate)!;
   return (
     <header className="gate-banner" style={{ ['--gate-color' as string]: st.color }}>
@@ -27,7 +27,7 @@ export function GateBanner({ gate }: { gate: GateId }) {
             ))}
           </span>
         )}
-        <button className={`btn btn-small btn-primary gate-pass ${done ? 'ready' : ''}`} onClick={passGate}>
+        <button className={`btn btn-small btn-primary gate-pass ${done ? 'ready' : ''}`} onClick={openRecap}>
           🚪 Qua cổng
         </button>
       </div>

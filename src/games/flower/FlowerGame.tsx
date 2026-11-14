@@ -1,14 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { audio, sfx } from '../../audio/AudioManager';
-import { randomPraise, randomRetry } from '../../audio/voiceLines';
-import { PassGateButton, reportDone } from '../../tour/gateBridge';
-import { answer, answerOf, canAnswer, initialState, next, toggleFlower, type FlowerState } from './logic';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useApp } from '../../app/store';
+import { PassGateButton, reportDone, reportRecap } from '../../tour/gateBridge';
+import { advance, answerOf, initialState, pickedOf, type FlowerState } from './logic';
 import { QUESTIONS, type Question } from './questions';
+import { flowerRecap } from './recap';
 
-const NEXT_DELAY_MS = 2600;
-const STONES = [0, 1, 2, 3, 4, 5, 6];
-
-const qKey = (q: Question) => `${q.a}-${q.b}`;
 
 /** Bông hoa vẽ giống hình SGK: 8 cánh, nhụy có chấm. Vàng là còn lại, đỏ là đã bớt đi. */
 export function Flower({ red }: { red: boolean }) {
@@ -51,8 +47,8 @@ function Butterfly() {
   );
 }
 
-/** Một dòng như trong sách: 6 bông hoa và phép tính. */
-function BookLine({ q, picked, small }: { q: Question; picked: number[]; small?: boolean }) {
+/** Một dòng như trong sách: 6 bông hoa và phép tính; `answer` thay cho kết quả (ví dụ ô "?" trong popup). */
+export function BookLine({ q, picked, small, answer }: { q: Question; picked: number[]; small?: boolean; answer?: ReactNode }) {
   return (
     <div className={`b1-line ${small ? 'small' : ''}`}>
       <span className="b1-line-flowers">
@@ -61,7 +57,7 @@ function BookLine({ q, picked, small }: { q: Question; picked: number[]; small?:
         ))}
       </span>
       <span className="b1-line-eq">
-        {q.a} − {q.b} = <b>{answerOf(q)}</b>
+        {q.a} − {q.b} = <b>{answer ?? answerOf(q)}</b>
       </span>
     </div>
   );
@@ -69,88 +65,38 @@ function BookLine({ q, picked, small }: { q: Question; picked: number[]; small?:
 
 export default function FlowerGame() {
   const [s, setS] = useState<FlowerState>(initialState);
+  const q = QUESTIONS[s.index];
+  // bảng phép tính hiện trong popup khi qua cổng
+  useEffect(() => reportRecap(flowerRecap(s, QUESTIONS)), [s]);
+
+  // giáo viên bấm vào bất kỳ đâu trên màn chơi (hoặc phím Next như PowerPoint) để hiện bước tiếp theo
   const sRef = useRef(s);
   sRef.current = s;
-  const [shake, setShake] = useState(0);
-  const q = QUESTIONS[s.index];
-  const timer = useRef<number>();
-
-  const update = (n: FlowerState) => {
+  const onNext = useCallback(() => {
+    const cur = sRef.current;
+    const n = advance(cur, QUESTIONS);
+    if (n === cur) return;
     sRef.current = n;
     setS(n);
-  };
-
-  const onFlower = useCallback((i: number) => {
-    const r = toggleFlower(sRef.current, QUESTIONS, i);
-    if (r.event === 'ignored') return;
-    update(r.state);
-    if (r.event === 'picked') sfx('pop');
-    else if (r.event === 'unpicked') sfx('whoosh');
-    else {
-      sfx('wrong');
-      audio.say('b1.enough', { interrupt: true });
-    }
+    if (n.finished) reportDone();
   }, []);
-
-  const onStone = useCallback((value: number) => {
-    const r = answer(sRef.current, QUESTIONS, value);
-    if (r.event === 'ignored') return;
-    update(r.state);
-    const cur = QUESTIONS[r.state.index];
-    if (r.event === 'needmore') {
-      sfx('wrong');
-      audio.say('b1.needmore', { interrupt: true });
-    } else if (r.event === 'correct') {
-      sfx('correct');
-      audio.say([randomPraise(), `b1.a.${qKey(cur)}`], { interrupt: true });
-      timer.current = window.setTimeout(() => {
-        const n = next(sRef.current, QUESTIONS);
-        update(n);
-        if (n.finished) {
-          sfx('win');
-          audio.say('finish');
-          reportDone();
-        } else {
-          audio.say(`b1.q.${qKey(QUESTIONS[n.index])}`);
-        }
-      }, NEXT_DELAY_MS);
-    } else {
-      sfx('wrong');
-      setShake((k) => k + 1);
-      audio.say(randomRetry(), { interrupt: true });
-    }
-  }, []);
-
   useEffect(() => {
-    audio.say(['b1.intro', `b1.q.${qKey(QUESTIONS[0])}`], { interrupt: true });
-    return () => {
-      window.clearTimeout(timer.current);
-      audio.stop();
+    const onKey = (e: KeyboardEvent) => {
+      // bỏ qua khi đang đứng ở một nút (Enter/Space để bấm chính nút đó)
+      if (e.target instanceof HTMLElement && e.target.closest('button, input, textarea')) return;
+      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) {
+        e.preventDefault();
+        onNext();
+      }
     };
-  }, []);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onNext]);
 
-  const restart = () => {
-    window.clearTimeout(timer.current);
-    update(initialState());
-    audio.say(`b1.q.${qKey(QUESTIONS[0])}`, { interrupt: true });
-  };
-
-  const ready = canAnswer(s, QUESTIONS);
-  const hint =
-    s.notice === 'enough'
-      ? `Đã bớt đủ ${q.b} bông rồi!`
-      : s.notice === 'needmore'
-        ? `Hãy bớt đủ ${q.b} bông trước nhé!`
-        : s.feedback === 'correct'
-          ? '🎉 Đúng rồi!'
-          : s.feedback === 'wrong'
-            ? 'Chưa đúng, đếm lại hoa vàng nhé!'
-            : ready
-              ? 'Còn lại mấy bông hoa vàng? Bấm viên đá số nhé!'
-              : `Bấm vào ${q.b - s.picked.length} bông hoa để bướm bay tới hút mật`;
-
+  const fromGate = useApp((a) => a.gate !== null);
+  const picked = s.step >= 1 ? pickedOf(q) : [];
   return (
-    <div className="game b1">
+    <div className="game b1 b1-click" onClick={onNext}>
       <div className="b1-head">
         <div className="b1-title wood-panel">
           <h1>🌼 VƯỜN HOA BƯỚM XINH 🦋</h1>
@@ -158,73 +104,51 @@ export default function FlowerGame() {
             Câu {s.index + 1} / {QUESTIONS.length}
             <span className="b3-dots">
               {QUESTIONS.map((_, i) => (
-                <span key={i} className={i < s.index || (i === s.index && s.feedback === 'correct') ? 'done' : i === s.index ? 'cur' : ''} />
+                <span key={i} className={i < s.index || (i === s.index && s.step === 3) ? 'done' : i === s.index ? 'cur' : ''} />
               ))}
             </span>
           </div>
         </div>
         <div className="b1-done-list">
-          {s.history.map((p, i) => (
-            <BookLine key={i} q={QUESTIONS[i]} picked={p} small />
+          {QUESTIONS.slice(0, s.index).map((x, i) => (
+            <BookLine key={i} q={x} picked={pickedOf(x)} small />
           ))}
         </div>
       </div>
 
       <div className="b1-garden">
         {Array.from({ length: q.a }, (_, i) => {
-          const red = s.picked.includes(i);
+          const red = picked.includes(i);
           return (
-            <button
-              key={`${s.index}-${i}`}
-              className={`b1-flower ${red ? 'red' : ''}`}
-              onClick={() => onFlower(i)}
-              aria-label={red ? `Bông hoa ${i + 1} đã bớt` : `Bông hoa ${i + 1}`}
-              aria-pressed={red}
-            >
+            <span key={`${s.index}-${i}`} className={`b1-flower ${red ? 'red' : ''}`} aria-label={red ? `Bông hoa ${i + 1} đã bớt` : `Bông hoa ${i + 1}`}>
               <Flower red={red} />
               <span className={`b1-butterfly ${red ? 'on' : ''}`}>
                 <Butterfly />
               </span>
-            </button>
+            </span>
           );
         })}
       </div>
 
-      <div className="b1-row">
+      {/* luôn giữ chỗ cho phép tính để hàng hoa không bị đẩy lên khi phép tính hiện ra */}
+      <div className={`b1-row ${s.step >= 2 ? 'pop-in' : ''}`} style={{ visibility: s.step >= 2 ? 'visible' : 'hidden' }}>
         {q.sample && <span className="b1-sample">Mẫu</span>}
-        <div className={`b1-eq wood-panel ${s.feedback === 'correct' ? 'correct pop-in' : ''}`}>
-          {q.a} − {q.b} = <span className="b1-box">{s.feedback === 'correct' ? answerOf(q) : '?'}</span>
+        <div className={`b1-eq wood-panel ${s.step === 3 ? 'correct pop-in' : ''}`}>
+          {q.a} − {q.b} = <span className="b1-box">{s.step === 3 ? answerOf(q) : '?'}</span>
         </div>
       </div>
 
-      <div className={`b1-hint ${s.notice ? 'warn' : ''} ${s.feedback === 'correct' ? 'ok' : ''}`}>{hint}</div>
-
-      <div className="b1-stones">
-        {STONES.map((n) => (
-          <button
-            key={n}
-            className={`b1-stone ${ready ? '' : 'locked'} ${s.wrongValue === n && s.feedback === 'wrong' ? 'wrong' : ''} ${
-              s.wrongValue === n ? `shake-${shake % 2}` : ''
-            }`}
-            onClick={() => onStone(n)}
-          >
-            {n}
-          </button>
-        ))}
-      </div>
-
-      {s.finished && (
-        <div className="overlay">
+      {/* chơi từ cổng thì popup bảng phép tính (đã có dòng hoa như sách) thay cho bảng này, để không đè nhau */}
+      {s.finished && !fromGate && (
+        // bấm trong bảng tổng kết không tính là bấm "tiếp"
+        <div className="overlay" onClick={(e) => e.stopPropagation()}>
           <div className="overlay-box wood-panel pop-in b1-summary">
             <h2>🎉 Hoàn thành Vườn Hoa!</h2>
             {QUESTIONS.map((x, i) => (
-              <BookLine key={i} q={x} picked={s.history[i] ?? []} />
+              <BookLine key={i} q={x} picked={pickedOf(x)} />
             ))}
-            <p>
-              Đúng ngay lần đầu: <b>{s.firstTry}</b> / {QUESTIONS.length} câu
-            </p>
             <div className="overlay-actions">
-              <button className="btn btn-big" onClick={restart}>
+              <button className="btn btn-big" onClick={() => setS(initialState())}>
                 🔁 Chơi lại
               </button>
               <PassGateButton />

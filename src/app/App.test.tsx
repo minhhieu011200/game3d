@@ -26,9 +26,9 @@ test('bấm Bắt đầu thì vào màn đường đi, không còn 3 thẻ bài'
 });
 
 test.each([
-  ['Bài 1: Vườn Hoa Bướm Xinh', 'man-choi-bai-1', 'Cổng 2'],
-  ['Bài 2: Đồng Cỏ Thỏ Nhảy Cà Rốt', 'man-choi-bai-2', 'Cổng 3'],
-  ['Bài 3: Trạm Soát Vé Bàn Tay Thần Kỳ', 'man-choi-bai-3', 'Cổng 1'],
+  ['Bài 1: Vườn Hoa Bướm Xinh', 'man-choi-bai-1', 'Cổng 1'],
+  ['Bài 2: Đồng Cỏ Thỏ Nhảy Cà Rốt', 'man-choi-bai-2', 'Cổng 2'],
+  ['Bài 3: Trạm Soát Vé Bàn Tay Thần Kỳ', 'man-choi-bai-3', 'Cổng 3'],
   ['Bài 4: Hồ Ếch & Vòng Quay Ánh Nến', 'man-choi-bai-4', 'Cổng 4'],
 ])('Bản đồ → "%s" → Vào cổng, rồi về đường đi', async (item, marker, gateNo) => {
   act(() => useApp.setState({ screen: 'tour', started: true }));

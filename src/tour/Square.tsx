@@ -1,18 +1,17 @@
 // Quảng Trường Huy Hiệu: cổng chúc mừng "Hẹn gặp lại", bục huy chương, cờ của 4 cổng, dây cờ, bóng bay, pháo hoa.
-// Không còn bảng thông báo che giữa màn hình: lời chúc nằm trên cổng và trong lời Vẹt Xanh.
-import { useEffect, useMemo, useRef } from 'react';
+// Không có bảng che giữa màn hình: lời chúc nằm trên cổng, phép tính của các cổng đã qua trên hai bảng gỗ hai bên.
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useQuality } from '../shared/3d/quality';
-import { Sign3D } from '../shared/3d/Sign3D';
 import { ArchBody, Balloons } from './Decor';
-import { CLASS_NAME, gateNumber, isGate, SQUARE, STATIONS } from './logic';
+import { CLASS_NAME, gateNumber, GATE_IDS, SQUARE, STATIONS, type GateId } from './logic';
+import type { RecapData } from './recap';
 import { SQUARE_LAYOUT, SQUARE_T } from './layout';
 import { PATH } from './path';
 import { useTour } from './store';
-import { solid, stoneMaterial } from './textures';
+import { brickMaterial, solid, stoneMaterial } from './textures';
 
-type V3 = [number, number, number];
 
 function rng(seed: number) {
   let s = seed >>> 0;
@@ -231,36 +230,6 @@ function Podium() {
   );
 }
 
-/** Băng rôn một cổng gắn trên tường: tô màu cổng và có dấu ✓ khi đã qua. */
-function WallBanner({ x, y, label, color, on }: { x: number; y: number; label: string; color: string; on: boolean }) {
-  return <Sign3D text={on ? `✓ ${label}` : label} height={0.62} bg={on ? color : '#9a9a9a'} border="#ffffff" billboard={false} position={[x, y, 0.34]} />;
-}
-
-/** Dây cờ tam giác võng giữa hai điểm. */
-function Bunting({ a, b, sag = 0.9 }: { a: V3; b: V3; sag?: number }) {
-  const items = useMemo(() => {
-    const n = 14;
-    const cols = ['#e8443a', '#f7d046', '#3d8fd6', '#5cb85c', '#ff8fb1', '#7b5cc9'];
-    return Array.from({ length: n }, (_, i) => {
-      const k = (i + 0.5) / n;
-      return {
-        p: [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k - Math.sin(k * Math.PI) * sag, a[2] + (b[2] - a[2]) * k] as V3,
-        c: cols[i % cols.length],
-      };
-    });
-  }, [a, b, sag]);
-  const ang = Math.atan2(b[2] - a[2], b[0] - a[0]);
-  return (
-    <>
-      {items.map((it, i) => (
-        <mesh key={i} position={it.p} rotation-y={-ang} material={solid(it.c, 0.6)}>
-          <coneGeometry args={[0.2, 0.45, 3]} />
-        </mesh>
-      ))}
-    </>
-  );
-}
-
 let dotTexture: THREE.Texture | null = null;
 /** Hạt tròn: lõi trắng sáng, viền mờ dần (hợp với cộng màu). */
 function dot() {
@@ -304,10 +273,8 @@ interface Burst {
 }
 
 function newBurst(r: () => number, center: THREE.Vector3, delay: number): Burst {
-  // nổ hai bên biển chúc mừng (không che chữ), thấp vừa khung hình
-  const side = r() < 0.5 ? -1 : 1;
-  // bên phải thấp hơn một chút: góc trên bên phải màn hình có bong bóng lời Vẹt Xanh
-  const to = new THREE.Vector3(center.x + side * (6.5 + r() * 6), side < 0 ? 9 + r() * 3 : 7.5 + r() * 2, center.z - 11 + (r() - 0.5) * 6);
+  // nổ ở giữa, ngay trên cổng chúc mừng
+  const to = new THREE.Vector3(center.x + (r() - 0.5) * 4, 9.5 + r() * 1.5, center.z + (r() - 0.5) * 3);
   const from = new THREE.Vector3(to.x + (r() - 0.5) * 3, 0.5, to.z + (r() - 0.5) * 2);
   const shape = SHAPES[Math.floor(r() * SHAPES.length)];
   const k = 2 + Math.floor(r() * 2);
@@ -340,7 +307,8 @@ function newBurst(r: () => number, center: THREE.Vector3, delay: number): Burst 
 /** Pháo hoa nhiều màu: tên lửa bay lên có vệt sáng, nổ hình cầu / vòng / hai lớp / liễu rủ, chớp sáng, lấp lánh rồi tàn. */
 function Fireworks() {
   const r = useMemo(() => rng(11), []);
-  const center = useMemo(() => PATH.getPointAt(SQUARE_T), []);
+  // giữa cổng chúc mừng: cổng ở z cục bộ = arch.z, tức lùi theo hướng đường đi một đoạn -arch.z
+  const center = useMemo(() => PATH.getPointAt(SQUARE_T).add(PATH.getTangentAt(SQUARE_T).multiplyScalar(-SQUARE_LAYOUT.arch.z)), []);
   const bursts = useRef<Burst[]>(Array.from({ length: BURSTS }, (_, i) => newBurst(r, center, i * 0.55)));
   const { sparks, flashes } = useMemo(() => {
     const mk = (n: number) => {
@@ -432,14 +400,128 @@ function Fireworks() {
   );
 }
 
+// ---------- Hai bảng gỗ ghi lại phép tính của các cổng đã qua ----------
+
+/** Các dòng của một cổng trên bảng gỗ: dòng tiêu đề "# …", rồi các phép tính lưu lúc qua cổng. */
+function gateLines(id: GateId, data: RecapData | undefined): string[] {
+  const st = STATIONS.find((x) => x.id === id)!;
+  const head = `# ${st.emoji} Cổng ${gateNumber(id)}`;
+  if (!data) return [head, '(chưa qua)'];
+  const rows = data.columns.flatMap((c) => c.rows);
+  if (rows.length === 0) return [head, '(chưa chơi)'];
+  return [head, ...rows.map((r) => `${r.a} − ${r.b} = ${r.done ? r.a - r.b : '?'}`)];
+}
+
+/** Mặt bảng: nẹp gỗ, dải tiêu đề, giấy màu kem; mỗi cổng một cột (dòng "# …" là tiêu đề cổng). */
+const COLS = 2;
+const FACE_W = 1024;
+const FACE_H = 1400;
+
+function boardFace(title: string, columns: string[][]) {
+  const W = FACE_W;
+  const H = FACE_H;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const wood = g.createLinearGradient(0, 0, 0, H);
+  wood.addColorStop(0, '#9a6636');
+  wood.addColorStop(1, '#6e4322');
+  g.fillStyle = wood;
+  g.beginPath();
+  g.roundRect(0, 0, W, H, 60);
+  g.fill();
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillStyle = '#fff3d6';
+  g.font = '800 76px "Baloo 2", sans-serif';
+  g.fillText(title, W / 2, 95);
+  g.fillStyle = '#fbf3df';
+  g.beginPath();
+  g.roundRect(60, 180, W - 120, H - 240, 30);
+  g.fill();
+  // ít dòng thì vẫn giữ khoảng cách dòng vừa phải, không giãn ra hết bảng
+  const rows = Math.max(9, ...columns.map((c) => c.length));
+  const rowH = (H - 300) / rows;
+  g.font = '800 70px "Baloo 2", sans-serif';
+  columns.forEach((lines, col) => lines.forEach((line, i) => {
+    const y = 240 + i * rowH + rowH / 2 - 10;
+    const x = 60 + ((W - 120) * (col + 0.5)) / COLS;
+    if (line.startsWith('# ') || !line.includes('= ')) {
+      g.fillStyle = line.startsWith('# ') ? '#b5541c' : '#9a8a6e';
+      g.textAlign = 'center';
+      g.fillText(line.replace(/^# /, ''), x, y);
+      return;
+    }
+    const [eq, res] = line.split('= ');
+    g.fillStyle = '#1f3157';
+    g.textAlign = 'right';
+    g.fillText(eq + '= ', x + 40, y);
+    g.fillStyle = res === '?' ? '#b9a98a' : '#1e8f4e';
+    g.textAlign = 'left';
+    g.fillText(res, x + 40, y);
+  }));
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+const BOARD_W = 7.2;
+
+/** Bảng gỗ có hai cột gạch và chân gạch, mặt bảng ghi phép trừ; gốc ở chân bảng. */
+function OpsBoard({ title, columns }: { title: string; columns: string[][] }) {
+  // vẽ lại khi phông chữ đã tải xong
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void document.fonts?.ready.then(() => alive && setFontsReady(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const face = useMemo(() => boardFace(title, columns), [title, columns, fontsReady]);
+  const w = BOARD_W;
+  const h = w * (FACE_H / FACE_W);
+  const y0 = 1.0;
+  return (
+    <group>
+      <mesh position={[0, y0 / 2, 0]} material={brickMaterial()} castShadow receiveShadow>
+        <boxGeometry args={[w + 1.2, y0, 0.7]} />
+      </mesh>
+      {[-1, 1].map((sd) => (
+        <mesh key={sd} position={[sd * (w / 2 + 0.35), y0 + h / 2, -0.05]} material={brickMaterial()} castShadow>
+          <boxGeometry args={[0.5, h + 0.3, 0.5]} />
+        </mesh>
+      ))}
+      <mesh position={[0, y0 + h / 2, -0.06]} material={solid('#5a361b', 0.9)} castShadow>
+        <boxGeometry args={[w + 0.2, h + 0.2, 0.1]} />
+      </mesh>
+      <mesh position={[0, y0 + h / 2, 0.0]}>
+        <planeGeometry args={[w, h]} />
+        <meshBasicMaterial map={face} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+
 export function Square() {
   const q = useQuality();
   const atSquare = useTour((s) => s.at === SQUARE && s.phase === 'atGate');
-  const passed = useTour((s) => s.passed);
   const p = PATH.getPointAt(SQUARE_T);
   const d = PATH.getTangentAt(SQUARE_T);
   const yaw = Math.atan2(-d.x, -d.z);
   const L = SQUARE_LAYOUT;
+  // hai bảng gỗ hiện lại các phép tính đã làm ở từng cổng (lưu lúc qua cổng)
+  const recaps = useTour((s) => s.recaps);
+  const [leftCols, rightCols] = useMemo(() => {
+    const col = (i: number) => gateLines(GATE_IDS[i], recaps[GATE_IDS[i]]);
+    return [
+      [col(0), col(1)],
+      [col(2), col(3)],
+    ];
+  }, [recaps]);
   return (
     <>
       <group position={[p.x, 0, p.z]} rotation-y={yaw}>
@@ -452,12 +534,14 @@ export function Square() {
         </mesh>
         {/* cổng chúc mừng phía sau quảng trường */}
         <group position={[0, 0, L.arch.z]}>
-          <ArchBody title={`🎉 CHÚC MỪNG LỚP ${CLASS_NAME}! 🎉`} sub="Hẹn gặp lại các bạn nhỏ! 👋" flags={['🏅', '🎈']} wallTo={L.arch.wallTo} />
-          {STATIONS.filter(isGate).map((st, i) => (
-            <WallBanner key={st.id} x={L.banners[i][0]} y={L.banners[i][1]} label={`Cổng ${gateNumber(st.id)} ${st.emoji}`} color={st.color} on={passed.includes(st.id)} />
-          ))}
-          <Bunting a={[-4.6, 5.6, 0.3]} b={[-L.arch.wallTo, 2.3, 0.3]} sag={0.6} />
-          <Bunting a={[4.6, 5.6, 0.3]} b={[L.arch.wallTo, 2.3, 0.3]} sag={0.6} />
+          <ArchBody title={`🎉 CHÚC MỪNG LỚP ${CLASS_NAME}! 🎉`} sub="Hẹn gặp lại các bạn nhỏ! 👋" flags={['🏅', '🎈']} wallTo={0} />
+          {/* hai bảng gỗ ghi lại phép tính các cổng đã qua, đứng thay chỗ tường rào hai bên cổng */}
+          <group position={[-L.boards.x, 0, 0]} rotation-y={L.boards.turn}>
+            <OpsBoard title="CỔNG 1 – 2" columns={leftCols} />
+          </group>
+          <group position={[L.boards.x, 0, 0]} rotation-y={-L.boards.turn}>
+            <OpsBoard title="CỔNG 3 – 4" columns={rightCols} />
+          </group>
         </group>
         <group position={[L.medal.x, 0, L.medal.z]} scale={1.2}>
           <Podium />

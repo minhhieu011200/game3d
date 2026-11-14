@@ -1276,11 +1276,9 @@ body,
   border-radius: 3px;
   z-index: -1;
 }
-.b1-flower:hover {
-  transform: scale(1.06) rotate(-4deg);
-}
-.b1-flower:active {
-  transform: scale(0.95);
+/* Bài 1 trình chiếu: bấm vào bất kỳ đâu để hiện bước tiếp theo */
+.b1-click {
+  cursor: pointer;
 }
 .b1-flower-svg {
   width: 100%;
@@ -1555,21 +1553,6 @@ body,
 }
 
 /* Màn đường đi */
-.tour-speech {
-  /* góc phải trên: không che biển cổng, bạn học sinh hay xe buýt của lớp */
-  position: absolute;
-  right: 20px;
-  top: 84px;
-  max-width: min(380px, 31vw);
-  font-size: clamp(16px, min(1.7vw, 3.2vh), 23px);
-  line-height: 1.35;
-  z-index: 30;
-  border-color: #2a9d3a;
-  box-shadow: 0 5px 0 #2a9d3a, inset 0 0 0 3px #bdf0c0;
-}
-.tour-speech b {
-  color: #1e8f4e;
-}
 .tour-controls {
   position: absolute;
   left: 20px;
@@ -1680,4 +1663,258 @@ body,
 .zoo .zoo-help {
   background: rgba(255, 244, 222, 0.88);
   color: #4a3218;
+}
+
+/* Popup bảng phép tính của cổng: phủ cả dải cổng, các phép tính chữ to để cả lớp đọc trên màn chiếu */
+.rp-overlay {
+  position: fixed;
+  z-index: 90;
+  background: rgba(20, 30, 50, 0.55);
+}
+.rp-box {
+  width: max-content;
+  min-width: min(520px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  background: var(--paper);
+  border: 5px solid var(--gate-color, var(--wood));
+  border-radius: 28px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25);
+  font-size: clamp(18px, min(2.6vw, 4.4vh), 36px);
+  text-align: center;
+}
+/* 2 đội × 7 ô: nhỏ chữ lại cho vừa màn 720 px mà không phải cuộn */
+.rp-box:has(.cols-2) {
+  font-size: clamp(16px, min(2.2vw, 3.5vh), 30px);
+}
+.rp-head {
+  background: var(--gate-color, var(--orange));
+  color: white;
+  padding: 0.35em 1em 0.4em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.rp-title {
+  font-size: 1.15em;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.rp-sub {
+  font-size: 0.7em;
+  font-weight: 700;
+  opacity: 0.95;
+}
+.rp-cols {
+  display: flex;
+  gap: 1.2em;
+  justify-content: center;
+  padding: 0.6em 0.9em 0.2em;
+}
+.rp-col {
+  min-width: 0;
+}
+.rp-col-head {
+  margin-bottom: 0.3em;
+  font-size: 0.75em;
+  white-space: nowrap;
+}
+.rp-note {
+  margin: 0.5em 0;
+  opacity: 0.7;
+}
+.rp-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.28em 0.8em;
+}
+.rp-rows.split {
+  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+}
+.rp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.22em;
+  padding: 0.1em 0.45em;
+  border-radius: 16px;
+  background: white;
+  border: 3px solid #e3d3b4;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  animation: rp-in 0.35s ease-out both;
+  animation-delay: calc(var(--i, 0) * 70ms + 150ms);
+}
+.rp-num {
+  min-width: 0.9em;
+  font-size: 1.25em;
+  color: var(--ink);
+}
+.rp-op {
+  font-size: 1.1em;
+  color: var(--orange);
+}
+.rp-res {
+  min-width: 1.5em;
+  padding: 0 0.15em;
+  border-radius: 12px;
+  background: var(--green);
+  color: white;
+  font-size: 1.25em;
+}
+.rp-mark {
+  min-width: 1.1em;
+  margin-left: 0.15em;
+  color: var(--green);
+}
+.rp-icon {
+  margin-right: 0.15em;
+}
+.rp-row.hl {
+  border-color: var(--orange);
+  background: #fff1e0;
+}
+.rp-row.miss .rp-res {
+  background: #b9b2a6;
+}
+.rp-row.miss .rp-mark {
+  color: var(--red);
+}
+.rp-row.pending {
+  background: transparent;
+  border-style: dashed;
+}
+.rp-row.pending .rp-num,
+.rp-row.pending .rp-op,
+.rp-row.pending .rp-icon {
+  opacity: 0.55;
+}
+.rp-row.pending .rp-res {
+  background: transparent;
+  color: #9a8a6e;
+  border: 3px dashed #c9b48c;
+}
+.rp-li {
+  display: contents;
+}
+button.rp-row {
+  width: 100%;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.15;
+  color: inherit;
+  cursor: pointer;
+}
+.rp-row.pending:hover {
+  border-color: var(--orange);
+}
+.rp-row.revealed {
+  border-style: dashed;
+  border-color: var(--orange);
+  background: #fff8ee;
+}
+.rp-row.revealed .rp-res {
+  background: var(--orange);
+}
+/* Bài 1: dòng hoa như bảng "Hoàn thành Vườn Hoa" */
+.rp-flower .b1-line-eq b {
+  color: #1e8f4e;
+}
+.rp-flower-q {
+  font: inherit;
+  color: #9a8a6e;
+  background: none;
+  border: 2px dashed #c9b48c;
+  border-radius: 8px;
+  padding: 0 0.3em;
+  cursor: pointer;
+}
+.rp-flower-revealed {
+  color: var(--orange);
+}
+/* Bài 3: bảng trừ hàng dọc như SGK */
+.rp-vt {
+  border-collapse: collapse;
+  font-weight: 800;
+  font-size: 1.15em;
+  text-align: center;
+}
+.rp-vt th,
+.rp-vt td {
+  min-width: 1.9em;
+  padding: 0.12em 0.25em;
+  border: 2px solid #e7a9c4;
+  background: #dceffc;
+  color: #2b5f8a;
+}
+.rp-vt th {
+  font-size: 1.4em;
+}
+.rp-vt-res td,
+.rp-vt-res th {
+  background: white;
+}
+.rp-vt-res td.done {
+  color: #1e8f4e;
+}
+.rp-vt-res td.revealed {
+  color: var(--orange);
+}
+.rp-vt-res td.pending button {
+  font: inherit;
+  color: #9a8a6e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+.rp-actions {
+  padding: 0.3em 0.8em 0.8em;
+  align-items: center;
+}
+.rp-actions .btn-big {
+  font-size: 1.1em;
+  padding: 0.25em 1.3em;
+}
+@keyframes rp-in {
+  from {
+    transform: translateY(12px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rp-row {
+    animation: none;
+  }
+}
+
+
+/* Bài 4: nút "Nhảy" ở bến ếch và khung "Đáp án" bên phải */
+.zoo-jump {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  z-index: 40;
+}
+.zoo-answer {
+  position: absolute;
+  right: 12px;
+  top: 76px;
+  min-width: min(300px, 30vw);
+  padding: 18px 22px;
+  text-align: center;
+  z-index: 40;
+}
+.zoo-answer-eq {
+  font-size: clamp(32px, 4.5vw, 64px);
+  font-weight: 800;
+  color: #1e8f4e;
 }

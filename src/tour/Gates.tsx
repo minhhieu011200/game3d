@@ -174,7 +174,7 @@ function Door({ side, open, color, w, h }: { side: 1 | -1; open: { current: numb
   );
 }
 
-/** Đèn tròn trên vòm (Cổng 1: sáng khi đã soát vé xong). */
+/** Đèn tròn trên vòm (trạm soát vé: sáng khi đã soát vé xong). */
 function ArchLights({ radius, spring, lit, z }: { radius: number; spring: number; lit: boolean; z: number }) {
   return (
     <>

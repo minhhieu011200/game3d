@@ -1,15 +1,20 @@
 // Cầu nối giữa trò chơi và cổng tham quan. Trò chơi chỉ cần báo tiến độ / đã xong và đặt nút "Qua cổng";
 // mở riêng lẻ (không từ cổng nào) thì mọi thứ ở đây đều không làm gì.
-import { audio } from '../audio/AudioManager';
 import { useApp } from '../app/store';
 import { current, isGate } from './logic';
+import type { RecapData } from './recap';
 import { useTour } from './store';
 
 const fromGate = () => useApp.getState().gate !== null;
 
-/** Số câu đã đúng (đèn soát vé ở Cổng 1). */
+/** Số câu đã đúng (đèn soát vé ở Bài 3). */
 export function reportProgress(n: number) {
   if (fromGate()) useTour.getState().setProgress(n);
+}
+
+/** Bảng phép tính của trò đang chơi; trò chơi gọi mỗi khi trạng thái đổi. */
+export function reportRecap(data: RecapData) {
+  if (fromGate()) useTour.getState().setRecap(data);
 }
 
 /** Trò chơi đã kết thúc. */
@@ -26,9 +31,9 @@ export function enterGate() {
 }
 
 export function passGate() {
+  useTour.getState().setRecapOpen(false);
   useTour.getState().pass();
   useApp.getState().go('tour');
-  audio.stop();
 }
 
 export function leaveGate() {

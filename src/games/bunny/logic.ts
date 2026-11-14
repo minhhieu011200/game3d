@@ -1,7 +1,7 @@
 import type { Level, Mode } from './levels';
 
 /** Trạng thái chuyển động của một làn: hai đội đua cùng lúc nên mỗi làn có trạng thái riêng. */
-export type LanePhase = 'idle' | 'hopping' | 'returning' | 'toGarden' | 'arrived';
+export type LanePhase = 'idle' | 'hopping' | 'hurt' | 'toGarden' | 'arrived';
 export type TileMark = 'unknown' | 'correct' | 'skipped';
 
 /** Hai đội theo thứ tự làn: làn 0 là Đội Đỏ (bên trái), làn 1 là Đội Xanh (bên phải). */
@@ -73,7 +73,8 @@ function withLane(s: RaceState, i: number, lane: LaneState): RaceState {
 
 /**
  * Làn `laneIdx` trả lời ô trước mặt: `saysEqual` là "Đúng" (bằng mục tiêu) hay "Sai".
- * Phán khớp thì thỏ nhảy lên ô; phán nhầm thì thỏ về vạch xuất phát, đi lại từ đầu.
+ * Phán khớp thì thỏ nhảy lên ô; phán nhầm thì ô rung đỏ, thỏ đứng tại chỗ (giữ các ô đã qua và số cà rốt)
+ * rồi trả lời lại chính ô đó.
  * Mỗi làn chỉ bị khoá khi chính thỏ của làn đó đang nhảy hoặc đã về đích; đội kia về trước vẫn không ảnh hưởng.
  */
 export function answer(s: RaceState, levels: Level[], laneIdx: number, saysEqual: boolean): { state: RaceState; event: AnswerEvent } {
@@ -86,8 +87,8 @@ export function answer(s: RaceState, levels: Level[], laneIdx: number, saysEqual
   const equal = result(t.a, t.b) === level.target;
 
   if (saysEqual !== equal) {
-    const back: LaneState = { ...initialLane(level), mistakes: lane.mistakes + 1, wrongId: t.id, phase: 'returning' };
-    return { state: withLane(s, laneIdx, back), event: 'wrong' };
+    const hurt: LaneState = { ...lane, mistakes: lane.mistakes + 1, wrongId: t.id, phase: 'hurt' };
+    return { state: withLane(s, laneIdx, hurt), event: 'wrong' };
   }
   const marks = lane.marks.slice();
   marks[i] = equal ? 'correct' : 'skipped';
@@ -103,7 +104,7 @@ export function landed(s: RaceState, levels: Level[], laneIdx: number): RaceStat
   switch (lane.phase) {
     case 'hopping':
       return withLane(s, laneIdx, lane.pos >= n - 1 ? { ...lane, pos: n, phase: 'toGarden' } : { ...lane, phase: 'idle' });
-    case 'returning':
+    case 'hurt':
       return withLane(s, laneIdx, { ...lane, wrongId: null, phase: 'idle' });
     case 'toGarden':
       return { ...withLane(s, laneIdx, { ...lane, phase: 'arrived' }), winner: s.winner ?? laneIdx };

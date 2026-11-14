@@ -5,8 +5,6 @@ import type { Level, Mode } from './levels';
 import { initialRace, type RaceState } from './logic';
 import { useBunny } from './store';
 
-vi.mock('../../audio/AudioManager', () => ({ audio: { say: vi.fn(), stop: vi.fn() }, sfx: vi.fn() }));
-
 // Mỗi làn 3 ô, mục tiêu 4. Làn Đỏ: 5−1 (đúng), 6−3 (sai), 8−4 (đúng). Làn Xanh: 7−3, 9−5 (đúng), 9−6 (sai).
 const RED: Level = { target: 4, tiles: [{ id: 't0', a: 5, b: 1 }, { id: 't1', a: 6, b: 3 }, { id: 't2', a: 8, b: 4 }] };
 const BLUE: Level = { target: 4, tiles: [{ id: 't0', a: 7, b: 3 }, { id: 't1', a: 9, b: 5 }, { id: 't2', a: 9, b: 6 }] };
@@ -111,7 +109,7 @@ describe('nút Đúng / Sai', () => {
     expect(useBunny.getState().lanes.map((l) => l.pos)).toEqual([0, 0]);
   });
 
-  test('bấm Sai ở ô bằng mục tiêu: thỏ về vạch xuất phát', () => {
+  test('bấm Sai ở ô bằng mục tiêu: thỏ đứng tại chỗ và trả lời lại', () => {
     setup('solo');
     fireEvent.click(screen.getByText(/Sai/));
     const lane = useBunny.getState().lanes[0];

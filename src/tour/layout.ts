@@ -44,7 +44,7 @@ export const ARCH = {
 };
 
 /** Xe buýt (khung tại BUS_T): đầu xe hướng +x cục bộ của xe, xoay `rot`. */
-export const BUS = { x: -8.0, z: -0.6, rot: -0.75 };
+export const BUS = { x: -9.0, z: -0.6, rot: -0.75 };
 /** Cột biển "Lớp …": cạnh đuôi xe, phía cổng chào, không chắn xe. */
 export const CLASS_SIGN = { x: -5.0, z: -2.6, rot: 0.45 };
 
@@ -81,18 +81,13 @@ const DECOR_R: Record<string, number> = {
 export const SQUARE_T = 0.975;
 export const SQUARE_LAYOUT = {
   floor: 9.5,
-  arch: { z: -9, wallTo: 8.6 },
+  arch: { z: -9 },
   medal: { x: 0, z: 0 },
-  /** Băng rôn Cổng 1 … 4 gắn trên hai bức tường của cổng chúc mừng: [x, độ cao], hai hàng mỗi bên. */
-  banners: [
-    [-7.0, 1.95],
-    [-7.0, 1.15],
-    [7.0, 1.95],
-    [7.0, 1.15],
-  ] as XZ[],
+  /** Hai bảng gỗ ghi bảng trừ, thay chỗ tường rào hai bên cổng chúc mừng: tâm bảng cách giữa x, quay vào giữa góc `turn` cho nhìn thẳng từ chỗ camera dừng. */
+  boards: { x: 10.0, turn: 0.35 },
   balloons: [
-    [-10.8, -8.2],
-    [10.8, -8.2],
+    [-15.2, -7.6],
+    [15.2, -7.6],
   ] as XZ[],
 };
 
@@ -225,7 +220,7 @@ export function squareFootprints(): Footprint[] {
   out.push(fp('square-medal', 'square-medal', t, L.medal.x, L.medal.z, 2.4));
   for (const s of [-1, 1]) {
     out.push(fp(`square-tower${s}`, 'square-arch', t, s * ARCH.span, L.arch.z, 1.0));
-    for (let x = ARCH.span + 0.8; x <= L.arch.wallTo; x += 1) out.push(fp(`square-wall${s}-${x.toFixed(1)}`, 'square-arch', t, s * x, L.arch.z, 0.35));
+    for (const dx of [-2.4, 0, 2.4]) out.push(fp(`square-board${s}${dx}`, 'square-board', t, s * (L.boards.x + dx), L.arch.z, 1.2));
   }
   L.balloons.forEach(([x, z], i) => out.push(fp(`square-balloons${i}`, `square-balloons${i}`, t, x, z, 0.6)));
   return out;

@@ -115,17 +115,28 @@ describe('trả lời Đúng / Sai (một mình)', () => {
     expect(r.state.lanes[0].carrots).toBe(1);
   });
 
-  test('Chọn 6−3 sau khi đã tìm: bấm Đúng ở ô khác mục tiêu thì về vạch xuất phát', () => {
+  test('Chọn 6−3 sau khi đã tìm: bấm Đúng ở ô khác mục tiêu thì thỏ đứng tại chỗ, giữ cà rốt', () => {
     const s = step(initialRace(SOLO, 'solo'), SOLO, 0, true);
     const r = answer(s, SOLO, 0, true);
     expect(r.event).toBe('wrong');
     const lane = r.state.lanes[0];
-    expect(lane.phase).toBe('returning');
+    expect(lane.phase).toBe('hurt');
     expect(lane.wrongId).toBe('t1');
-    expect(lane.pos).toBe(-1);
-    expect(lane.carrots).toBe(0);
-    expect(lane.marks).toEqual(['unknown', 'unknown', 'unknown']);
+    expect(lane.pos).toBe(0);
+    expect(lane.carrots).toBe(1);
+    expect(lane.marks).toEqual(['correct', 'unknown', 'unknown']);
     expect(lane.mistakes).toBe(1);
+  });
+
+  test('Nhầm xong thì trả lời lại đúng ô vừa nhầm, không phải đi lại từ đầu', () => {
+    let s = step(initialRace(SOLO, 'solo'), SOLO, 0, true);
+    s = step(s, SOLO, 0, true); // nhầm ở ô t1
+    expect(s.lanes[0].phase).toBe('idle');
+    expect(s.lanes[0].pos).toBe(0);
+    const r = answer(s, SOLO, 0, false); // trả lời lại ô t1
+    expect(r.event).toBe('skipped');
+    expect(r.state.lanes[0].pos).toBe(1);
+    expect(r.state.lanes[0].carrots).toBe(1);
   });
 
   test('Bấm Sai ở ô bằng mục tiêu cũng là nhầm', () => {
@@ -134,7 +145,7 @@ describe('trả lời Đúng / Sai (một mình)', () => {
     expect(r.state.lanes[0].wrongId).toBe('t0');
   });
 
-  test('Chọn đúng sau khi sai: thỏ đi lại từ ô đầu', () => {
+  test('Nhầm ngay ô đầu: thỏ vẫn ở vạch xuất phát, chọn đúng thì lên ô đầu', () => {
     const s = step(initialRace(SOLO, 'solo'), SOLO, 0, false);
     expect(s.lanes[0].phase).toBe('idle');
     expect(s.lanes[0].wrongId).toBeNull();
@@ -184,11 +195,11 @@ describe('hai đội đua cùng lúc', () => {
     expect(answer(s, TEAMS, 1, true).event).toBe('correct');
   });
 
-  test('một đội nhầm thì chỉ thỏ đội đó về vạch xuất phát', () => {
+  test('một đội nhầm thì thỏ đội đó đứng tại chỗ, đội kia không bị ảnh hưởng', () => {
     let s = step(initialRace(TEAMS, 'teams'), TEAMS, 0, true);
     s = step(s, TEAMS, 1, true);
     s = step(s, TEAMS, 1, false); // Xanh nhầm ở 9−5
-    expect(s.lanes[1].pos).toBe(-1);
+    expect(s.lanes[1].pos).toBe(0);
     expect(s.lanes[1].mistakes).toBe(1);
     expect(s.lanes[0].pos).toBe(0);
   });

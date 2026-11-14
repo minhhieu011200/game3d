@@ -42,8 +42,10 @@ const storkX = (ZONES.storks.x0 + ZONES.storks.x1) / 2 + 1;
 export const DOCKS: Dock[] = [
   // bến cổng nằm ngoài cổng: thuyền chạy qua cổng cầu vồng để vào vườn thú
   { id: 'gate', label: '🚪 Cổng', x: ZONES.gate - 4 },
-  { id: 'frogs', label: '🐸 Bến ếch', x: frogX, look: [frogX, riverCenterZ(frogX) + RIVER_HALF_WIDTH + 2] },
-  { id: 'storks', label: '🕊️ Bến cò', x: storkX, look: [storkX, riverCenterZ(storkX) - RIVER_HALF_WIDTH - 3] },
+  // nhìn từ cao xuống để thuyền và các bạn nhỏ không che các bạn ếch trên bờ và dưới nước
+  { id: 'frogs', label: '🐸 Bến ếch', x: frogX, look: [frogX, riverCenterZ(frogX) + RIVER_HALF_WIDTH + 2], polar: 0.95 },
+  // nhìn gần ngang để thấy cả bầu trời khi các bạn cò bay lên (không giữ góc nhìn từ cao của bến ếch)
+  { id: 'storks', label: '🕊️ Bến cò', x: storkX, look: [storkX, riverCenterZ(storkX) - RIVER_HALF_WIDTH - 3], polar: 1.3 },
   { id: 'animals', label: '🦌 Bến thú', x: (ZONES.animals.x0 + ZONES.animals.x1) / 2 },
   // vòng quay nến ở cuối sông
   { id: 'candles', label: '🎡 Bến nến', x: WHEEL.x, look: [WHEEL.x, WHEEL.z], lookY: WHEEL.hubY - 1.2, polar: 1.32 },

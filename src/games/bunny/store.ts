@@ -1,9 +1,7 @@
 import { create } from 'zustand';
-import { audio, sfx } from '../../audio/AudioManager';
-import { randomPraise, randomRetry } from '../../audio/voiceLines';
 import { reportDone } from '../../tour/gateBridge';
 import { DEFAULT_TARGET, generateRace, type Level, type Mode } from './levels';
-import { allArrived, answer, initialRace, landed, TEAMS, validateLevel, type AnswerEvent, type RaceState } from './logic';
+import { allArrived, answer, initialRace, landed, validateLevel, type RaceState } from './logic';
 
 interface BunnyStore extends RaceState {
   /** Số cần tìm của từng đội (chơi một mình thì chỉ dùng phần tử đầu). */
@@ -41,18 +39,6 @@ function fresh(targets: number[], mode: Mode) {
 }
 
 export const useBunny = create<BunnyStore>()((set, get) => {
-  const react = (event: AnswerEvent) => {
-    if (event === 'correct') {
-      sfx('correct');
-      audio.say(randomPraise(), { interrupt: true });
-    } else if (event === 'skipped') {
-      sfx('hop');
-    } else if (event === 'wrong') {
-      sfx('wrong');
-      audio.say(randomRetry(), { interrupt: true });
-    }
-  };
-
   return {
     ...fresh([DEFAULT_TARGET, DEFAULT_TARGET], 'solo'),
     targets: [DEFAULT_TARGET, DEFAULT_TARGET],
@@ -60,7 +46,6 @@ export const useBunny = create<BunnyStore>()((set, get) => {
       const r = answer(get(), get().levels, lane, saysEqual);
       if (r.event === 'ignored') return;
       set(r.state);
-      react(r.event);
     },
     landed(lane) {
       const before = get();
@@ -69,13 +54,8 @@ export const useBunny = create<BunnyStore>()((set, get) => {
       const arrived = next.lanes[lane].phase === 'arrived';
       const times = arrived ? before.times.map((t, i) => (i === lane ? now() - before.startedAt : t)) : before.times;
       set({ ...next, times });
-      if (next.lanes[lane].phase === 'toGarden') sfx('hop');
       if (!arrived) return;
-      sfx('win');
       if (allArrived(next)) reportDone();
-      if (next.mode === 'solo') audio.say(['b2.carrot', 'finish'], { interrupt: true });
-      else if (before.winner === null) audio.say(`b2.win.${TEAMS[lane].key}`, { interrupt: true });
-      else if (allArrived(next)) audio.say('b2.carrot', { interrupt: true });
     },
     setMode(mode) {
       set({ mode });
@@ -88,9 +68,6 @@ export const useBunny = create<BunnyStore>()((set, get) => {
     newLevel() {
       const { mode, targets } = get();
       set(fresh(targets, mode));
-      // hai đội cùng số thì đọc đề; khác số thì mỗi đội xem số trên phần sân của mình
-      if (mode === 'solo' || targets[0] === targets[1]) audio.say(`b2.intro.${targets[0]}`, { interrupt: true });
-      else audio.stop();
     },
     restart() {
       get().newLevel();

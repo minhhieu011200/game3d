@@ -1,4 +1,3 @@
-import { unlockAudio } from '../audio/AudioManager';
 import { useApp } from './store';
 
 /** Màn chào: bấm "Bắt đầu" là lên xe buýt vào Vườn Thú Số Vui. */
@@ -11,7 +10,6 @@ export function HomeScreen() {
       <button
         className="btn btn-big"
         onClick={() => {
-          unlockAudio();
           start();
           go('tour');
         }}

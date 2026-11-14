@@ -7,36 +7,42 @@ CÁCH MỞ
   3. Một cửa sổ đen hiện lên và trình duyệt Edge tự mở trò chơi.
      Đừng đóng cửa sổ đen trong lúc chơi. Muốn tắt trò chơi thì đóng cả hai.
   Không cần mạng, không cần cài thêm gì.
+  File start.bat để ở đâu cũng chạy được: có thể chép riêng nó ra Desktop cho tiện.
+  Nó tự tìm thư mục TroChoiToan1 trên máy (Desktop, Tài liệu, Tải xuống, các ổ đĩa và USB).
 
 CHUYẾN THAM QUAN "VƯỜN THÚ SỐ VUI"
-  Bấm "Bắt đầu": xe buýt đưa cả lớp tới vườn thú, Vẹt Xanh làm hướng dẫn viên.
+  Bấm "Bắt đầu": xe buýt đưa cả lớp tới cổng chào vườn thú.
   Đường đi có 4 cổng, mỗi cổng là một bài (thứ tự theo câu chuyện):
-    Cổng 1 – Trạm Soát Vé Bàn Tay Thần Kỳ  → Bài 3 (giơ ngón tay)
-    Cổng 2 – Vườn Hoa Bướm Xinh            → Bài 1
-    Cổng 3 – Đồng Cỏ Thỏ Nhảy Cà Rốt       → Bài 2
+    Cổng 1 – Vườn Hoa Bướm Xinh            → Bài 1
+    Cổng 2 – Đồng Cỏ Thỏ Nhảy Cà Rốt       → Bài 2
+    Cổng 3 – Trạm Soát Vé Bàn Tay Thần Kỳ  → Bài 3 (giơ ngón tay)
     Cổng 4 – Hồ Ếch & Vòng Quay Ánh Nến    → Bài 4
   Đi hết 4 cổng là tới Quảng Trường Huy Hiệu: cả lớp nhận huy hiệu "Nhà thám hiểm Phép Trừ nhí".
 
   Cô điều khiển bằng các nút:
-    • "Đi tiếp" (ở đầu đường): đi tới Cổng 1. Vẹt Xanh đọc lời dẫn của cổng.
+    • "Đi tiếp" (ở đầu đường): đi tới Cổng 1.
     • "Vào cổng": mở trò chơi của cổng đó.
-    • "Qua cổng": ở dải trên cùng khi đang chơi, hoặc ở màn kết thúc. Bấm là cổng mở,
-      cả lớp đi luôn tới trước cổng kế tiếp (sau Cổng 4 là Quảng Trường),
-      được đánh dấu đã qua. Không cần chơi hết mới được qua (khi thiếu giờ).
+    • BẢNG PHÉP TÍNH: chơi xong một cổng là hiện ngay bảng các phép tính của bài để cả lớp
+      đọc lại: phép đã làm có kết quả và dấu ✔, phép chưa làm ghi "?" màu mờ (cả lớp nhẩm nốt).
+    • "Qua cổng": trong bảng phép tính, hoặc ở màn kết thúc. Bấm là cổng mở, được đánh dấu
+      đã qua, cả lớp đi luôn tới trước cổng kế tiếp (sau Cổng 4 là Quảng Trường).
+      Nút "Qua cổng" ở dải trên cùng mở bảng phép tính trước: không cần chơi hết mới được
+      qua (khi thiếu giờ); bấm "Chơi tiếp" nếu muốn chơi tiếp.
     • "Về đường đi": thoát trò chơi, đứng lại trước cổng, cổng chưa tính là đã qua.
     • "Bản đồ" (góc trái màn đường đi): nhảy thẳng tới cổng bất kỳ hoặc Quảng Trường.
     • Ở Quảng Trường: "Đi lại từ đầu" để bắt đầu chuyến mới.
   Tải lại trang (F5) thì chuyến đi bắt đầu lại từ đầu.
-  Ở Cổng 1, mỗi câu đúng làm sáng một trong 8 bóng đèn của máy soát vé.
+  Ở Cổng 3 (soát vé), mỗi câu đúng làm sáng một trong 8 bóng đèn của máy soát vé.
 
 CÁC BÀI
   Bài 1 – Vườn Hoa Bướm Xinh (6 − 1 … 6 − 5, câu 6 − 1 là câu mẫu):
-          có 6 bông hoa vàng. Bấm vào số bông cần bớt: bướm bay tới đậu, bông chuyển đỏ
-          (bấm lại bông đỏ để bỏ chọn). Bớt đủ rồi thì đếm bông vàng còn lại và bấm
-          viên đá số đúng. Cuối bài có bảng 5 dòng giống trang sách.
+          cô bấm vào màn hình để hiện từng bước: 6 bông hoa vàng → bướm bay tới đậu
+          (bông chuyển đỏ) → hiện phép tính → hiện kết quả; bấm tiếp để sang câu sau. Có thể bấm phím như PowerPoint
+          (mũi tên phải, Page Down, phím cách, Enter) hoặc bút trình chiếu.
+          Cuối bài có bảng 5 dòng giống trang sách.
   Bài 2 – Thỏ nhảy tìm cà rốt: thỏ đi lần lượt từng ô, không nhảy cóc.
           Ô sáng hỏi "Bằng …?": kết quả bằng số cần tìm thì bấm "Đúng", không bằng thì bấm "Sai".
-          Trả lời đúng thì thỏ nhảy lên ô đó; nhầm thì thỏ về vạch xuất phát, đi lại từ đầu.
+          Trả lời đúng thì thỏ nhảy lên ô đó; nhầm thì ô rung đỏ, thỏ đứng tại chỗ để trả lời lại ô đó.
           Đi hết các ô thì thỏ nhảy vào hàng rào cà rốt.
           Góc trái chọn chế độ:
             • "1 người": một làn, một con thỏ.
@@ -54,8 +60,11 @@ CÁC BÀI
      • Lái thuyền: phím W A S D, phím mũi tên, hoặc giữ nút ▲◀▼▶ ở góc phải.
        Bấm các nút "Bến" bên trái thì thuyền tự chạy tới bến đó.
        Kéo chuột để xoay nhìn quanh thuyền, lăn chuột để lại gần / ra xa.
-     • Kéo bạn ếch xuống sông, kéo bạn cò lên dải "bầu trời" ở trên cùng, bấm nến để thổi tắt.
-     • Giáo viên: bấm "Hiện đáp án" để hiện số đếm và phép trừ.
+     • Tới "Bến ếch" thì có nút "🐸 Nhảy": bấm vào, 5 bạn ếch cùng nhảy xuống hồ. Khung bên
+       phải có nút "Đáp án": bấm để hiện 10 − 5 = 5.
+     • Tới "Bến cò" thì có nút "🕊️ Bay": bấm vào, 2 bạn cò cùng bay lên trời; "Đáp án" hiện
+       10 − 2 = 8. Bấm "Đáp án" không tự qua cổng: xong cả hai bến thì bấm "Qua cổng".
+     • Vẫn kéo được ếch, cò và bấm nến để thổi tắt.
      • Học sinh: làm theo nhiệm vụ (thuyền tự đưa tới bến), rồi chọn phép tính đúng.
 
 CAMERA
@@ -69,7 +78,6 @@ MÁY CHẠY CHẬM?
 
 NẾU BẤM start.bat MÀ KHÔNG CHẠY
   • Cửa sổ đen báo cổng bận: đóng bớt chương trình rồi chạy lại.
-  • Máy chặn PowerShell: bấm chuột phải vào nút Start > "Terminal" hoặc "Windows PowerShell",
-    gõ lệnh sau rồi Enter (thay đường dẫn cho đúng chỗ để thư mục):
-        powershell -ExecutionPolicy Bypass -File "D:\TroChoiToan1\server.ps1"
-    Nếu vẫn bị chặn, nhờ cán bộ phụ trách máy tính cho phép chạy file server.ps1.
+  • Cửa sổ đen báo không tìm thấy trò chơi: chép cả thư mục TroChoiToan1 (có thư mục game bên trong)
+    vào máy. Nếu đang mở file .zip thì giải nén (Extract All) trước.
+  • Máy chặn PowerShell: nhờ cán bộ phụ trách máy tính cho phép chạy PowerShell, rồi bấm lại start.bat.

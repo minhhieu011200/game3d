@@ -5,11 +5,11 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useQuality } from '../shared/3d/quality';
 import { Sign3D } from '../shared/3d/Sign3D';
-import { Ball } from '../shared/3d/toon';
+import { Ball, toon } from '../shared/3d/toon';
 import { cameraT, CLASS_NAME, isGate, isPassed, STATIONS, STOP_BEFORE_GATE } from './logic';
 import { useTour } from './store';
-import { CandyFences, FlowerBushes, Lamps, RoadsideAnimals, WelcomeArch, Balloons } from './Decor';
-import { BUS, BUS_T, CAM_BACK, CAM_H, CLASS_SIGN, GATE, plantTrees, toWorld } from './layout';
+import { CandyFences, FlowerBushes, Lamps, PawPrints, RoadsideAnimals, WelcomeArch, Balloons } from './Decor';
+import { ARCH_T, BUS, BUS_T, CAM_BACK, CAM_H, CLASS_SIGN, GATE, plantTrees, toWorld } from './layout';
 import { PATH } from './path';
 import { walk, Walkers } from './Walkers';
 import { Gate } from './Gates';
@@ -249,48 +249,147 @@ function VintageBus() {
   );
 }
 
-/** Cột biển gỗ "Lớp …": hai cột tròn có chóp, thanh ngang treo biển bằng xích, chân đá và hộp hoa. */
+const SIGN_WOOD = '#7a4e2a';
+const GLOW = (c: string) => toon(c, { emissive: c });
+const FLOWER_COLORS = ['#ff7aa8', '#ffd23f', '#9b7bff', '#ff8a3d', '#5bc0ff'];
+const ORB_COLORS = ['#ffb3c7', '#fff2a8', '#ffffff', '#e6b3ff', '#fff2a8', '#ffffff', '#c9b3ff', '#ffb3c7'];
+const BASE_COLORS = ['#e8443a', '#f39a2b', '#4caf50', '#2f8fd8', '#8a5cc9', '#e2559a'];
+
+/** Dây leo xanh có đèn nháy vàng, chạy từ a tới b. */
+function Vine({ a, b, n }: { a: V3; b: V3; n: number }) {
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const k = (i + 0.5) / n;
+        const p: V3 = [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k + 0.08];
+        return i % 2 ? (
+          <Ball key={i} p={p} s={0.045} c="#ffe27a" shadow={false} />
+        ) : (
+          <Ball key={i} p={p} s={[0.08, 0.05, 0.05]} r={[0, 0, i]} c="#4f9a3a" shadow={false} />
+        );
+      })}
+    </>
+  );
+}
+
+/** Đám mây nhỏ trang trí góc biển. */
+function Puff({ p, s = 1 }: { p: V3; s?: number }) {
+  return (
+    <group position={p} scale={s}>
+      <Ball p={[0, 0, 0]} s={[0.16, 0.1, 0.06]} c="#ffffff" shadow={false} />
+      <Ball p={[-0.13, -0.02, 0]} s={[0.1, 0.07, 0.05]} c="#ffffff" shadow={false} />
+      <Ball p={[0.13, -0.02, 0]} s={[0.1, 0.07, 0.05]} c="#ffffff" shadow={false} />
+    </group>
+  );
+}
+
+function Owl({ p, c }: { p: V3; c: string }) {
+  return (
+    <group position={p}>
+      <Ball p={[0, 0, 0]} s={[0.13, 0.15, 0.1]} c={c} />
+      <Ball p={[0, -0.02, 0.06]} s={[0.08, 0.09, 0.05]} c="#f2dcb4" shadow={false} />
+      <Ball p={[-0.05, 0.06, 0.08]} s={0.035} c="#ffffff" shadow={false} />
+      <Ball p={[0.05, 0.06, 0.08]} s={0.035} c="#ffffff" shadow={false} />
+      <Ball p={[-0.05, 0.06, 0.105]} s={0.018} c="#2b1a10" shadow={false} />
+      <Ball p={[0.05, 0.06, 0.105]} s={0.018} c="#2b1a10" shadow={false} />
+    </group>
+  );
+}
+
+function PandaHead({ p }: { p: V3 }) {
+  return (
+    <group position={p}>
+      <Ball p={[0, 0, 0]} s={[0.15, 0.13, 0.11]} c="#ffffff" />
+      <Ball p={[-0.11, 0.1, 0]} s={0.05} c="#222222" shadow={false} />
+      <Ball p={[0.11, 0.1, 0]} s={0.05} c="#222222" shadow={false} />
+      <Ball p={[-0.055, 0.01, 0.09]} s={[0.04, 0.03, 0.02]} c="#222222" shadow={false} />
+      <Ball p={[0.055, 0.01, 0.09]} s={[0.04, 0.03, 0.02]} c="#222222" shadow={false} />
+      <Ball p={[0, -0.04, 0.1]} s={0.02} c="#222222" shadow={false} />
+    </group>
+  );
+}
+
+/** Hoa nhỏ: cuống xanh, bông tròn. */
+function Bloom({ p, c, h = 0.18 }: { p: V3; c: string; h?: number }) {
+  return (
+    <group position={p}>
+      <mesh position={[0, h / 2, 0]} material={solid('#4f8a34', 0.8)}>
+        <cylinderGeometry args={[0.012, 0.012, h, 5]} />
+      </mesh>
+      <Ball p={[0, h, 0]} s={[0.07, 0.07, 0.03]} c={c} shadow={false} />
+      <Ball p={[0, h, 0.02]} s={0.025} c="#ffd23f" shadow={false} />
+    </group>
+  );
+}
+
+/**
+ * Biển gỗ "Lớp …": hai cột có chóp vàng, thanh ngang treo biển, dây leo đèn nháy,
+ * thú nhỏ trên biển, hộp hoa có hàng đèn cầu nhiều màu, bệ trắng ghi lời chào.
+ */
 function ClassSign() {
-  const WOOD = '#7a4e2a';
   return (
     <group>
-      {/* chân đá */}
-      <mesh position={[0, 0.12, 0]} material={solid('#cfc4ae', 0.9)} castShadow receiveShadow>
-        <boxGeometry args={[3.0, 0.24, 0.6]} />
+      {/* bệ trắng ghi lời chào */}
+      <mesh position={[0, 0.14, 0]} material={solid('#f4efe4', 0.9)} castShadow receiveShadow>
+        <boxGeometry args={[3.7, 0.28, 0.7]} />
       </mesh>
-      {/* hai cột đứng ngoài mép biển để không đè lên chữ */}
-      {[-1.35, 1.35].map((x) => (
+      <Sign3D
+        text="CÁNH CỬA ĐẾN THẾ GIỚI MỚI!"
+        height={0.24}
+        bg="#f4efe4"
+        border="#f4efe4"
+        rainbow={BASE_COLORS}
+        billboard={false}
+        position={[0, 0.14, 0.36]}
+      />
+      {/* hai cột gỗ có chóp vàng, quấn dây leo đèn nháy */}
+      {[-1.65, 1.65].map((x) => (
         <group key={x} position={[x, 0, 0]}>
-          <mesh position={[0, 1.35, 0]} material={solid(WOOD, 0.85)} castShadow>
-            <cylinderGeometry args={[0.08, 0.1, 2.3, 12]} />
+          <mesh position={[0, 1.4, 0]} material={solid(SIGN_WOOD, 0.85)} castShadow>
+            <cylinderGeometry args={[0.09, 0.11, 2.3, 12]} />
           </mesh>
-          <mesh position={[0, 2.62, 0]} material={solid('#d4a645', 0.35, 0.7)} castShadow>
-            <coneGeometry args={[0.13, 0.28, 12]} />
+          <mesh position={[0, 2.72, 0]} material={solid('#d4a645', 0.35, 0.7)} castShadow>
+            <coneGeometry args={[0.14, 0.32, 12]} />
           </mesh>
-          <mesh position={[0, 2.5, 0]} material={solid('#d4a645', 0.35, 0.7)}>
-            <sphereGeometry args={[0.11, 12, 8]} />
-          </mesh>
+          <Vine a={[0, 0.4, 0]} b={[0, 2.5, 0]} n={14} />
         </group>
       ))}
-      {/* thanh ngang và xích treo biển */}
-      <mesh position={[0, 2.3, 0]} rotation-z={Math.PI / 2} material={solid(WOOD, 0.85)} castShadow>
-        <cylinderGeometry args={[0.06, 0.06, 2.8, 10]} />
+      {/* thanh ngang, dây leo và xích treo biển */}
+      <mesh position={[0, 2.38, 0]} rotation-z={Math.PI / 2} material={solid(SIGN_WOOD, 0.85)} castShadow>
+        <cylinderGeometry args={[0.07, 0.07, 3.5, 10]} />
       </mesh>
+      <Vine a={[-1.6, 2.42, 0]} b={[1.6, 2.42, 0]} n={22} />
       {[-0.8, 0.8].map((x) => (
-        <mesh key={x} position={[x, 2.14, 0.06]} material={ironMaterial()}>
-          <cylinderGeometry args={[0.015, 0.015, 0.32, 6]} />
+        <mesh key={x} position={[x, 2.22, 0.06]} material={ironMaterial()}>
+          <cylinderGeometry args={[0.015, 0.015, 0.3, 6]} />
         </mesh>
       ))}
-      <Sign3D text={`🚌 Lớp ${CLASS_NAME}`} height={0.72} wood border="#3b2210" color="#fff3d6" billboard={false} position={[0, 1.62, 0.08]} />
-      {/* hộp hoa dưới biển */}
-      <mesh position={[0, 0.42, 0.05]} material={solid('#8a5a2b', 0.9)} castShadow>
-        <boxGeometry args={[2.2, 0.36, 0.42]} />
+      <Sign3D text={`🚌 Lớp ${CLASS_NAME}`} height={0.9} wood border="#3b2210" color="#f3d29a" billboard={false} position={[0, 1.66, 0.08]} />
+      {/* thú nhỏ và mây trên biển */}
+      <Owl p={[-0.55, 2.2, 0.12]} c="#8a5a33" />
+      <Owl p={[-0.25, 2.2, 0.12]} c="#a8703f" />
+      <PandaHead p={[1.3, 1.24, 0.18]} />
+      <Puff p={[-1.2, 2.0, 0.16]} />
+      <Puff p={[0.75, 2.12, 0.16]} s={1.2} />
+      {/* hộp hoa: cỏ, hàng đèn cầu nhiều màu, cầu vồng nhỏ và hoa ở mặt trước */}
+      <mesh position={[0, 0.5, 0.05]} material={solid('#8a5a2b', 0.9)} castShadow>
+        <boxGeometry args={[2.3, 0.44, 0.46]} />
       </mesh>
-      {Array.from({ length: 10 }, (_, i) => (
-        <group key={i} position={[-0.9 + i * 0.2, 0.68, 0.05]}>
-          <Ball p={[0, 0, 0]} s={[0.13, 0.11, 0.13]} c="#4f8a34" shadow={false} />
-          <Ball p={[0, 0.1, 0.06]} s={0.07} c={['#ff8fb1', '#ffd23f', '#ffffff', '#c39bff'][i % 4]} shadow={false} />
-        </group>
+      <mesh position={[0, 0.75, 0.05]} material={solid('#5aa03c', 0.95)}>
+        <boxGeometry args={[2.3, 0.08, 0.46]} />
+      </mesh>
+      {ORB_COLORS.map((c, i) => (
+        <mesh key={i} position={[-0.95 + i * 0.27, 0.88, 0.05]} material={GLOW(c)}>
+          <sphereGeometry args={[0.085, 12, 8]} />
+        </mesh>
+      ))}
+      {['#e8443a', '#f39a2b', '#f7d046', '#5cb85c', '#3d8fd6'].map((c, i) => (
+        <mesh key={c} position={[0, 0.34, 0.29]} material={solid(c, 0.6)}>
+          <torusGeometry args={[0.22 - i * 0.035, 0.018, 6, 24, Math.PI]} />
+        </mesh>
+      ))}
+      {[-0.95, -0.75, -0.55, -0.35, 0.35, 0.55, 0.75, 0.95].map((x, i) => (
+        <Bloom key={x} p={[x, 0.3, 0.29]} c={FLOWER_COLORS[i % FLOWER_COLORS.length]} h={0.14 + (i % 3) * 0.04} />
       ))}
     </group>
   );
@@ -304,7 +403,7 @@ function Bus() {
       <group position={[BUS.x, 0, BUS.z]} rotation-y={BUS.rot}>
         <VintageBus />
       </group>
-      <group position={[CLASS_SIGN.x, 0, CLASS_SIGN.z]} rotation-y={CLASS_SIGN.rot}>
+      <group position={[CLASS_SIGN.x, 0, CLASS_SIGN.z]} rotation-y={CLASS_SIGN.rot} scale={1.4}>
         <ClassSign />
       </group>
     </group>
@@ -421,6 +520,7 @@ export function TourScene() {
       <Clouds />
       <Bus />
       <WelcomeArch />
+      <PawPrints from={0.02} to={ARCH_T - 0.004} />
       <CandyFences />
       <Lamps />
       <FlowerBushes />

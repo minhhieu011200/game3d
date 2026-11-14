@@ -18,9 +18,9 @@ import {
 test('thứ tự và tên cổng theo câu chuyện', () => {
   const gates = STATIONS.filter(isGate).map((s) => [s.title, s.lesson, s.screen]);
   expect(gates).toEqual([
-    ['Trạm Soát Vé Bàn Tay Thần Kỳ', 3, 'finger'],
     ['Vườn Hoa Bướm Xinh', 1, 'flower'],
     ['Đồng Cỏ Thỏ Nhảy Cà Rốt', 2, 'bunny'],
+    ['Trạm Soát Vé Bàn Tay Thần Kỳ', 3, 'finger'],
     ['Hồ Ếch & Vòng Quay Ánh Nến', 4, 'zoo'],
   ]);
   expect(STATIONS[0].id).toBe('start');
@@ -41,11 +41,11 @@ test('đi tới cổng 1, vào chơi rồi qua cổng', () => {
   expect(s.phase).toBe('playing');
   s = pass(s);
   // qua cổng thì đi luôn tới trước cổng 2, không phải bấm "Đi tiếp"
-  expect(s).toMatchObject({ at: 2, phase: 'moving', passed: ['ticket'] });
+  expect(s).toMatchObject({ at: 2, phase: 'moving', passed: ['flower'] });
   expect(cameraT(s)).toBeGreaterThan(STATIONS[1].t);
   expect(cameraT(s)).toBeLessThan(current(s).t);
   s = arrive(s);
-  expect(current(s).id).toBe('flower');
+  expect(current(s).id).toBe('bunny');
 });
 
 test('rời trò chơi giữa chừng thì không đánh dấu đã qua', () => {
@@ -57,7 +57,7 @@ test('rời trò chơi giữa chừng thì không đánh dấu đã qua', () => 
 
 test('qua cổng ngay khi đứng trước cổng (giáo viên cho qua)', () => {
   const s = pass(arrive(advance(initialTour())));
-  expect(s.passed).toEqual(['ticket']);
+  expect(s.passed).toEqual(['flower']);
 });
 
 test('bản đồ nhảy tới cổng 4 không đánh dấu các cổng trước', () => {
@@ -72,7 +72,7 @@ test('đi hết 4 cổng thì tới quảng trường, và đi lại từ đầu
   let s = initialTour();
   s = arrive(advance(s));
   for (let i = 0; i < 4; i++) s = arrive(pass(enter(s)));
-  expect(s.passed).toEqual(['ticket', 'flower', 'bunny', 'pond']);
+  expect(s.passed).toEqual(['flower', 'bunny', 'ticket', 'pond']);
   // qua cổng 4 là tới thẳng quảng trường
   expect(s.at).toBe(SQUARE);
   expect(canAdvance(s)).toBe(false);
@@ -85,5 +85,5 @@ test('cổng đã qua thì đi tiếp được ngay khi đứng trước nó', (
   s = pass(enter(arrive(advance(s))));
   s = arrive(jumpTo(s, 1));
   expect(canAdvance(s)).toBe(true);
-  expect(pass(s).passed).toEqual(['ticket']); // không lặp
+  expect(pass(s).passed).toEqual(['flower']); // không lặp
 });

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { audio, sfx } from '../../audio/AudioManager';
-import { randomPraise, randomRetry } from '../../audio/voiceLines';
 import { CameraView } from '../../hand/CameraView';
 import { useHandTracker } from '../../hand/useHandTracker';
-import { PassGateButton, reportDone, reportProgress } from '../../tour/gateBridge';
+import { PassGateButton, reportDone, reportProgress, reportRecap } from '../../tour/gateBridge';
 import { answer, answerOf, initialState, next, type FingerState } from './logic';
 import { QUESTIONS } from './questions';
+import { fingerRecap } from './recap';
 
 const NEXT_DELAY_MS = 2400;
 
@@ -15,51 +14,35 @@ export default function FingerGame() {
   sRef.current = s;
   const [shake, setShake] = useState(0);
   const q = QUESTIONS[s.index];
+  // bảng phép tính hiện trên đường đi sau khi qua cổng
+  useEffect(() => reportRecap(fingerRecap(s, QUESTIONS)), [s]);
 
   const submit = useCallback((value: number) => {
     const r = answer(sRef.current, QUESTIONS, value);
     if (r.event === 'ignored') return;
     sRef.current = r.state;
     setS(r.state);
-    const cur = QUESTIONS[r.state.index];
     if (r.event === 'correct') {
-      sfx('correct');
       reportProgress(r.state.index + 1);
-      audio.say([randomPraise(), `b3.a.${cur.a}-${cur.b}`], { interrupt: true });
       window.setTimeout(() => {
         const n = next(sRef.current, QUESTIONS);
         sRef.current = n;
         setS(n);
-        if (n.finished) {
-          sfx('win');
-          audio.say('finish');
-          reportDone();
-        } else {
-          const nq = QUESTIONS[n.index];
-          audio.say(`b3.q.${nq.a}-${nq.b}`);
-        }
+        if (n.finished) reportDone();
       }, NEXT_DELAY_MS);
     } else {
-      sfx('wrong');
       setShake((k) => k + 1);
-      audio.say(randomRetry(), { interrupt: true });
     }
   }, []);
 
   const tracker = useHandTracker({ onCommit: submit });
   const cameraOk = tracker.status === 'ready' || tracker.status === 'loading';
 
-  useEffect(() => {
-    audio.say(['b3.intro', `b3.q.${QUESTIONS[0].a}-${QUESTIONS[0].b}`], { interrupt: true });
-    return () => audio.stop();
-  }, []);
-
   const restart = () => {
     const n = initialState();
     sRef.current = n;
     setS(n);
     tracker.resetHold();
-    audio.say(`b3.q.${QUESTIONS[0].a}-${QUESTIONS[0].b}`, { interrupt: true });
   };
 
   return (

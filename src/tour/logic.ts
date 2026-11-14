@@ -14,8 +14,6 @@ export interface Station {
   lesson: number | null;
   /** Trò chơi mở ra khi vào cổng. */
   screen: GameScreen | null;
-  /** Lời Vẹt Xanh nói khi tới trạm (cũng là khóa giọng đọc). */
-  voiceKey: string;
   speech: string;
   /** Vị trí trên đường đi, 0 … 1. */
   t: number;
@@ -29,31 +27,18 @@ export const STATIONS: readonly Station[] = [
     title: 'Bến xe buýt',
     lesson: null,
     screen: null,
-    voiceKey: 'tour.welcome',
     speech: `Chào mừng thầy cô và các em học sinh lớp ${CLASS_NAME} đến Khu vui chơi sở thú! Mình là Vẹt Xanh, hướng dẫn viên. Cùng mình đi tham quan nhé!`,
     t: 0.02,
     color: '#ff9f43',
     emoji: '🚌',
   },
   {
-    id: 'ticket',
-    title: 'Trạm Soát Vé Bàn Tay Thần Kỳ',
-    lesson: 3,
-    screen: 'finger',
-    voiceKey: 'tour.gate.1',
-    speech: 'Muốn vào vườn thú, các bạn phải đưa bàn tay cho máy soát vé kiểm tra! Giơ đúng số ngón tay thì đèn sẽ sáng.',
-    t: 0.245,
-    color: '#2ecc71',
-    emoji: '✋',
-  },
-  {
     id: 'flower',
     title: 'Vườn Hoa Bướm Xinh',
     lesson: 1,
     screen: 'flower',
-    voiceKey: 'tour.gate.2',
     speech: 'Khu vườn có sáu bông hoa vàng. Đàn bướm đói đang bay tới hút mật! Các bạn đếm xem còn lại mấy bông nhé.',
-    t: 0.4,
+    t: 0.245,
     color: '#f5b700',
     emoji: '🌼',
   },
@@ -62,18 +47,26 @@ export const STATIONS: readonly Station[] = [
     title: 'Đồng Cỏ Thỏ Nhảy Cà Rốt',
     lesson: 2,
     screen: 'bunny',
-    voiceKey: 'tour.gate.3',
     speech: 'Bạn Thỏ bị lạc rồi! Hãy tìm những phép trừ có kết quả bằng bốn để giúp Thỏ về tới vườn cà rốt.',
-    t: 0.6,
+    t: 0.4,
     color: '#ff7f2a',
     emoji: '🐰',
+  },
+  {
+    id: 'ticket',
+    title: 'Trạm Soát Vé Bàn Tay Thần Kỳ',
+    lesson: 3,
+    screen: 'finger',
+    speech: 'Muốn vào vườn thú, các bạn phải đưa bàn tay cho máy soát vé kiểm tra! Giơ đúng số ngón tay thì đèn sẽ sáng.',
+    t: 0.6,
+    color: '#2ecc71',
+    emoji: '✋',
   },
   {
     id: 'pond',
     title: 'Hồ Ếch & Vòng Quay Ánh Nến',
     lesson: 4,
     screen: 'zoo',
-    voiceKey: 'tour.gate.4',
     speech: 'Khu cuối cùng có hồ ếch, đàn cò và vòng quay ánh nến. Bạn nào đếm giỏi nhất nào?',
     t: 0.8,
     color: '#3498db',
@@ -84,7 +77,6 @@ export const STATIONS: readonly Station[] = [
     title: 'Quảng Trường Huy Hiệu',
     lesson: null,
     screen: null,
-    voiceKey: 'tour.square',
     speech: `Hoan hô! Chúc mừng các bạn lớp ${CLASS_NAME} đã đi hết vườn thú và nhận huy chương Nhà thám hiểm Phép Trừ nhí. Hẹn gặp lại các bạn nhé!`,
     t: 0.97,
     color: '#9b59b6',
@@ -92,7 +84,7 @@ export const STATIONS: readonly Station[] = [
   },
 ];
 
-export const GATE_IDS: readonly GateId[] = ['ticket', 'flower', 'bunny', 'pond'];
+export const GATE_IDS: readonly GateId[] = ['flower', 'bunny', 'ticket', 'pond'];
 export const SQUARE = STATIONS.length - 1;
 
 export function isGate(st: Station): st is Station & { id: GateId; screen: GameScreen; lesson: number } {

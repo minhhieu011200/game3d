@@ -21,7 +21,7 @@ test('mở riêng lẻ thì không có nút Qua cổng và không báo tiến đ
 
 test('mở từ cổng thì có nút, bấm thì về đường đi', () => {
   act(() => {
-    useTour.setState({ at: 2, phase: 'playing' });
+    useTour.setState({ at: 1, phase: 'playing' });
     useApp.setState({ gate: 'flower' });
   });
   render(<PassGateButton />);

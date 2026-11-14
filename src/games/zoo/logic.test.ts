@@ -13,7 +13,6 @@ import {
   zoneAt,
   type ZooObject,
 } from './logic';
-import { chooseAnswer, initialStudent, onSceneChange, TASKS, type StudentState } from './tasks';
 import { FLY_Y, groundHeight, intersectSurface, isInRiver, riverCenterZ, SKY_Y, WATER_Y } from './world';
 
 const ids = (objs: ZooObject[], kind: string) => objs.filter((o) => o.kind === kind).map((o) => o.id);
@@ -154,53 +153,3 @@ test('đặt lại cảnh: về đủ 10 mỗi loại', () => {
   expect(initialObjects()).toEqual(initialObjects());
 });
 
-describe('chế độ học sinh', () => {
-  test('nhiệm vụ ếch: kéo đúng 2 con thì hỏi và có lựa chọn 10 − 2 = 8', () => {
-    let s = initialStudent();
-    expect(TASKS[0].prompt).toBe('Hãy cho 2 bạn ếch nhảy xuống sông');
-    const o = frogsToRiver(initialObjects(), 2);
-    s = onSceneChange(s, o);
-    expect(s.phase).toBe('question');
-    expect(s.choices).toHaveLength(3);
-    expect(s.choices).toContain('10 − 2 = 8');
-  });
-
-  test('chọn sai thì cho chọn lại; chọn đúng thì sang nhiệm vụ kế', () => {
-    const o = frogsToRiver(initialObjects(), 2);
-    let s = onSceneChange(initialStudent(), o);
-    const wrong = s.choices.find((c) => c !== '10 − 2 = 8')!;
-    let r = chooseAnswer(s, o, wrong);
-    expect(r.correct).toBe(false);
-    expect(r.state.phase).toBe('question');
-    s = r.state;
-    r = chooseAnswer(s, o, '10 − 2 = 8');
-    expect(r.correct).toBe(true);
-    expect(r.state.taskIndex).toBe(1);
-    expect(r.state.phase).toBe('doing');
-  });
-
-  test('làm thừa: kéo 3 ếch thì chưa hỏi, kéo bớt 1 thì mới hỏi', () => {
-    let o = frogsToRiver(initialObjects(), 3);
-    let s: StudentState = onSceneChange(initialStudent(), o);
-    expect(s.phase).toBe('doing');
-    o = moveObject(o, ids(o, 'frog')[2], [0, groundHeight(0, 10), 10], 'ground');
-    s = onSceneChange(s, o);
-    expect(s.phase).toBe('question');
-  });
-
-  test('làm hết 3 nhiệm vụ ếch, cò, nến thì hoàn thành', () => {
-    let o = initialObjects();
-    let s = initialStudent();
-    o = frogsToRiver(o, 2);
-    s = onSceneChange(s, o);
-    s = chooseAnswer(s, o, '10 − 2 = 8').state;
-    for (const id of ids(o, 'stork').slice(0, 5)) o = moveObject(o, id, [10, FLY_Y, 10], 'sky');
-    s = onSceneChange(s, o);
-    s = chooseAnswer(s, o, '10 − 5 = 5').state;
-    for (const id of ids(o, 'candle').slice(0, 3)) o = toggleCandle(o, id);
-    s = onSceneChange(s, o);
-    const r = chooseAnswer(s, o, '10 − 3 = 7');
-    expect(r.correct).toBe(true);
-    expect(r.state.phase).toBe('done');
-  });
-});

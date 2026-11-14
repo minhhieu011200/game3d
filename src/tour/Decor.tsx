@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { Animal } from '../games/zoo/scene/Animals';
 import { useQuality } from '../shared/3d/quality';
 import { Sign3D } from '../shared/3d/Sign3D';
-import { Ball, BOX, CYL, SPHERE_LOW, Tube, toon } from '../shared/3d/toon';
+import { Ball, BOX, Cone, CuteEye, CYL, SPHERE_LOW, Tube, toon } from '../shared/3d/toon';
 import { brickMaterial, ironMaterial, solid } from './textures';
 import { CLASS_NAME } from './logic';
 import { ARCH, ARCH_T, bushSpots, FENCE_SIDE, fenced, lampSpots, ROADSIDE_ANIMALS } from './layout';
@@ -155,8 +155,13 @@ export function ArchBody({ title, sub, flags, wallTo }: { title: string; sub: st
       })}
       <IronLeaf side={-1} />
       <IronLeaf side={1} />
-      <BrickWall x0={-span - 0.8} x1={-wallTo} />
-      <BrickWall x0={span + 0.8} x1={wallTo} />
+      {/* tường gạch hai bên (bỏ khi wallTo không vượt quá chân tháp) */}
+      {wallTo > span + 0.8 && (
+        <>
+          <BrickWall x0={-span - 0.8} x1={-wallTo} />
+          <BrickWall x0={span + 0.8} x1={wallTo} />
+        </>
+      )}
       {/* biển gỗ trên đỉnh vòm, treo bằng hai cột sắt */}
       {[-2.4, 2.4].map((x) => (
         <mesh key={x} position={[x, archY + 4.6, 0]} material={ironMaterial()}>
@@ -179,23 +184,119 @@ export function ArchBody({ title, sub, flags, wallTo }: { title: string; sub: st
   );
 }
 
-/** Cổng chào lớn ở đầu đường: "KHU VUI CHƠI SỞ THÚ" và lời chào lớp. */
+/** Cột gạch vuông có chân và mũ đá trắng. */
+function BrickPillar({ x, h }: { x: number; h: number }) {
+  return (
+    <group position={[x, 0, 0]}>
+      <mesh position={[0, 0.25, 0]} material={solid('#efe6d6', 0.8)} castShadow receiveShadow>
+        <boxGeometry args={[1.95, 0.5, 1.95]} />
+      </mesh>
+      <mesh position={[0, h / 2, 0]} material={brickMaterial()} castShadow receiveShadow>
+        <boxGeometry args={[1.6, h, 1.6]} />
+      </mesh>
+      <mesh position={[0, h + 0.15, 0]} material={solid('#efe6d6', 0.8)} castShadow>
+        <boxGeometry args={[2.0, 0.3, 2.0]} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Chú chim nhỏ đậu trên biển cổng. */
+function Bird({ p }: { p: V3 }) {
+  return (
+    <group position={p} rotation-y={-0.3}>
+      <Ball p={[0, 0.32, 0]} s={[0.34, 0.36, 0.3]} c="#9b6a3c" />
+      <Ball p={[0, 0.28, 0.14]} s={[0.24, 0.26, 0.2]} c="#f4dcb2" />
+      <Ball p={[0, 0.74, 0.02]} s={0.24} c="#9b6a3c" />
+      <CuteEye p={[-0.09, 0.78, 0.2]} size={0.06} />
+      <CuteEye p={[0.09, 0.78, 0.2]} size={0.06} />
+      <Cone p={[0, 0.7, 0.27]} s={[0.06, 0.12, 0.06]} r={[Math.PI / 2, 0, 0]} c="#f2a33a" />
+      <Ball p={[-0.3, 0.36, -0.02]} s={[0.1, 0.22, 0.2]} c="#7a4f2a" />
+      <Ball p={[0.3, 0.36, -0.02]} s={[0.1, 0.22, 0.2]} c="#7a4f2a" />
+    </group>
+  );
+}
+
+const TITLE_COLORS = ['#e8443a', '#f39a2b', '#f2c12e', '#4caf50', '#2f8fd8', '#8a5cc9', '#e2559a'];
+const PILLAR_H = 3.4;
+const BOW_R = 4.9;
+
+/** Cổng chào lớn ở đầu đường: cột gạch, cầu vồng dày, biển gỗ chữ cầu vồng, các bạn thú trên cổng. */
 export function WelcomeArch() {
   const p = PATH.getPointAt(ARCH_T);
   const d = PATH.getTangentAt(ARCH_T);
   const yaw = Math.atan2(-d.x, -d.z);
+  const span = ARCH.span;
+  const onBow = (deg: number, r = BOW_R): [number, number] => [Math.cos((deg * Math.PI) / 180) * r, PILLAR_H + Math.sin((deg * Math.PI) / 180) * r];
+  const [pandaX, pandaY] = onBow(160);
+  const [monkeyX, monkeyY] = onBow(38);
   return (
     <group position={[p.x, 0, p.z]} rotation-y={yaw}>
-      <ArchBody
-        title="🐻 KHU VUI CHƠI SỞ THÚ 🐘"
+      <BrickPillar x={-span} h={PILLAR_H} />
+      <BrickPillar x={span} h={PILLAR_H} />
+      {/* cầu vồng dày, chân đặt trên hai mũ cột */}
+      {RAINBOW.map((col, i) => (
+        <mesh key={col} position={[0, PILLAR_H, 0]} scale={[1, 1, 2.4]} material={solid(col, 0.55)} castShadow>
+          <torusGeometry args={[BOW_R - i * 0.26, 0.15, 12, 64, Math.PI]} />
+        </mesh>
+      ))}
+      <IronLeaf side={-1} />
+      <IronLeaf side={1} />
+      <BrickWall x0={-span - 0.8} x1={-ARCH.wallTo} />
+      <BrickWall x0={span + 0.8} x1={ARCH.wallTo} />
+      <Sign3D
+        text="KHU VUI CHƠI SỞ THÚ"
         sub={`Chào mừng thầy cô và các em học sinh lớp ${CLASS_NAME}!`}
-        flags={['🦁', '🐘']}
-        wallTo={ARCH.wallTo}
+        height={2.2}
+        wood
+        border="#3b2210"
+        subColor="#ffe08a"
+        rainbow={TITLE_COLORS}
+        billboard={false}
+        twoSided
+        position={[0, PILLAR_H + BOW_R + 0.55, 0.5]}
       />
+      <Bird p={[2.6, PILLAR_H + BOW_R + 1.6, 0.5]} />
+      {/* các bạn thú trên cổng: sư tử ngồi chân cột phải, gấu trúc ngồi trên cầu vồng, khỉ đu bên phải */}
+      <Animal kind="lion" at={[span - 0.1, 1.5]} ground={() => 0} />
+      <Animal kind="panda" at={[pandaX, 0.6]} ground={() => pandaY - 0.2} />
+      <Animal kind="monkey" at={[monkeyX, 0.6]} ground={() => monkeyY - 0.5} />
       <Balloons p={[ARCH.balloons.x, 0, ARCH.balloons.z]} seed={2} />
       <Animal kind="giraffe" at={[ARCH.giraffe.x, ARCH.giraffe.z]} rot={ARCH.giraffe.rot} ground={() => 0} />
       <Animal kind="elephant" at={[ARCH.elephant.x, ARCH.elephant.z]} rot={ARCH.elephant.rot} ground={() => 0} />
     </group>
+  );
+}
+
+// ---------- Dấu chân màu trên đường tới cổng chào ----------
+
+const PAW_COLORS = ['#e8443a', '#f39a2b', '#4caf50', '#2f8fd8', '#8a5cc9', '#e2559a'];
+
+/** Dấu chân thú nhiều màu in trên đường từ bến xe tới cổng chào. */
+export function PawPrints({ from, to, step = 0.008 }: { from: number; to: number; step?: number }) {
+  const prints = useMemo(() => {
+    const out: { p: THREE.Vector3; yaw: number; c: string }[] = [];
+    for (let t = from, i = 0; t < to; t += step, i++) {
+      const tan = PATH.getTangentAt(t);
+      out.push({ p: sidePoint(t, (i % 2 ? 1 : -1) * 0.75), yaw: Math.atan2(-tan.x, -tan.z), c: PAW_COLORS[i % PAW_COLORS.length] });
+    }
+    return out;
+  }, [from, to, step]);
+  return (
+    <>
+      {prints.map(({ p, yaw, c }, i) => (
+        <group key={i} position={[p.x, 0.09, p.z]} rotation-y={yaw}>
+          <mesh scale={[0.4, 1, 0.34]} material={solid(c, 0.6)}>
+            <cylinderGeometry args={[1, 1, 0.02, 20]} />
+          </mesh>
+          {[-0.2, 0, 0.2].map((x) => (
+            <mesh key={x} position={[x * 1.5, 0, -0.46 + Math.abs(x) * 0.6]} scale={[0.13, 1, 0.15]} material={solid(c, 0.6)}>
+              <cylinderGeometry args={[1, 1, 0.02, 14]} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </>
   );
 }
 

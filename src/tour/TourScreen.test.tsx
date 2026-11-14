@@ -15,22 +15,20 @@ beforeEach(() => {
   });
 });
 
-test('ở bến xe: Vẹt Xanh chào và có nút Đi tiếp', () => {
+test('ở bến xe: không có bong bóng lời Vẹt Xanh, có nút Đi tiếp', () => {
   render(<TourScreen />);
-  expect(screen.getByText(/Mình là Vẹt Xanh/)).toBeTruthy();
-  expect(screen.getByText(/học sinh lớp 1\/7/)).toBeTruthy();
+  expect(screen.queryByText(/Vẹt Xanh/)).toBeNull();
   fireEvent.click(screen.getByText('Đi tiếp ▶'));
   expect(useTour.getState()).toMatchObject({ at: 1, phase: 'moving' });
-  expect(screen.getByText(/Đang đi tới Trạm Soát Vé/)).toBeTruthy();
+  expect(screen.getByText(/Đang đi tới Vườn Hoa Bướm Xinh/)).toBeTruthy();
 });
 
-test('tới cổng 1: lời dẫn soát vé và nút Vào cổng', () => {
+test('tới cổng 1: có nút Vào cổng', () => {
   act(() => useTour.setState({ at: 1, phase: 'atGate' }));
   render(<TourScreen />);
-  expect(screen.getByText(/đưa bàn tay cho máy soát vé/)).toBeTruthy();
   expect(screen.queryByText('Đi tiếp ▶')).toBeNull();
   fireEvent.click(screen.getByText(/Vào cổng/));
-  expect(useApp.getState()).toMatchObject({ screen: 'finger', gate: 'ticket' });
+  expect(useApp.getState()).toMatchObject({ screen: 'flower', gate: 'flower' });
 });
 
 test('bản đồ nhảy tới Cổng 4 mà không đánh dấu các cổng trước', () => {
@@ -39,7 +37,7 @@ test('bản đồ nhảy tới Cổng 4 mà không đánh dấu các cổng trư
   fireEvent.click(screen.getByText('Bài 4: Hồ Ếch & Vòng Quay Ánh Nến'));
   expect(useTour.getState()).toMatchObject({ at: 4, phase: 'moving', passed: [] });
   act(() => useTour.getState().arrive());
-  expect(screen.getByText(/Bạn nào đếm giỏi nhất/)).toBeTruthy();
+  expect(screen.getByText(/Vào cổng/)).toBeTruthy();
 });
 
 test('bản đồ đánh dấu cổng đã qua', () => {
@@ -48,26 +46,25 @@ test('bản đồ đánh dấu cổng đã qua', () => {
   fireEvent.click(screen.getByText(/Bản đồ/));
   const done = Array.from(document.querySelectorAll('.tour-map-item.done')).map((e) => e.textContent);
   expect(done).toHaveLength(2);
-  expect(done[0]).toContain('Trạm Soát Vé');
-  expect(done[1]).toContain('Đồng Cỏ Thỏ');
+  expect(done[0]).toContain('Đồng Cỏ Thỏ');
+  expect(done[1]).toContain('Trạm Soát Vé');
 });
 
-test('quảng trường: lời chúc mừng và hẹn gặp lại, không có bảng che, đi lại từ đầu', () => {
+test('quảng trường: không có bảng che hay bong bóng lời, đi lại từ đầu', () => {
   act(() => useTour.setState({ at: SQUARE, phase: 'atGate', passed: ['ticket', 'flower', 'bunny', 'pond'] }));
   render(<TourScreen />);
-  expect(screen.getByText(/Chúc mừng các bạn lớp 1\/7/)).toBeTruthy();
-  expect(screen.getByText(/Hẹn gặp lại/)).toBeTruthy();
+  expect(screen.queryByText(/Vẹt Xanh/)).toBeNull();
   expect(document.querySelector('.tour-square')).toBeNull(); // không còn bảng che giữa màn hình
   fireEvent.click(screen.getByText(/Đi lại từ đầu/));
   expect(useTour.getState()).toMatchObject({ at: 0, phase: 'idle', passed: [] });
 });
 
-test('dải Cổng 1 có 3 trong 8 đèn sáng khi đã đúng 3 câu', () => {
+test('dải Cổng 3 (soát vé) có 3 trong 8 đèn sáng khi đã đúng 3 câu', () => {
   act(() => useTour.setState({ progress: 3 }));
   render(<GateBanner gate="ticket" />);
   expect(document.querySelectorAll('.gate-light')).toHaveLength(8);
   expect(document.querySelectorAll('.gate-light.on')).toHaveLength(3);
-  expect(screen.getByText('Cổng 1')).toBeTruthy();
+  expect(screen.getByText('Cổng 3')).toBeTruthy();
 });
 
 test('dải các cổng khác không có đèn soát vé', () => {
@@ -75,3 +72,4 @@ test('dải các cổng khác không có đèn soát vé', () => {
   expect(document.querySelectorAll('.gate-light')).toHaveLength(0);
   expect(screen.getByText(/Vườn Hoa Bướm Xinh/)).toBeTruthy();
 });
+

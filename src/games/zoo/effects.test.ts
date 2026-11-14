@@ -3,8 +3,6 @@ import { LAND, LIFT, stepSpring, type Spring } from './squash';
 import { useZoo } from './store';
 import { riverCenterZ, WATER_Y, FLY_Y } from './world';
 
-vi.mock('../../audio/AudioManager', () => ({ audio: { say: vi.fn(), stop: vi.fn() }, sfx: vi.fn() }));
-
 beforeEach(() => {
   useZoo.getState().reset();
   takeEffects();

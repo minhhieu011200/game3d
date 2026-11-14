@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { GateBanner } from '../tour/GateBanner';
+import { RecapPopup } from '../tour/RecapPopup';
 import { useApp } from './store';
 import { HomeScreen } from './HomeScreen';
 import { AboutScreen } from './AboutScreen';
@@ -32,6 +33,7 @@ export function App() {
       <div className="app in-gate">
         <GateBanner gate={gate} />
         <div className="gate-body">{content}</div>
+        <RecapPopup gate={gate} />
       </div>
     );
   }

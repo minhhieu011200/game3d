@@ -43,16 +43,15 @@ function hopFrames(dx: number, dy: number, h: number): Keyframe[] {
   ];
 }
 
-/** Nhầm: rung tại chỗ rồi nhảy một mạch về vạch xuất phát. */
-function returnFrames(dx: number, dy: number, h: number): Keyframe[] {
+/** Nhầm: thỏ lắc đầu, rung tại chỗ rồi đứng yên, không rời ô đang đứng. */
+function hurtFrames(): Keyframe[] {
   return [
-    { transform: `translate(${dx}px, ${dy}px)`, offset: 0 },
-    { transform: `translate(${dx - 12}px, ${dy}px)`, offset: 0.08 },
-    { transform: `translate(${dx + 12}px, ${dy}px)`, offset: 0.16 },
-    { transform: `translate(${dx - 7}px, ${dy}px)`, offset: 0.24 },
-    { transform: `translate(${dx}px, ${dy}px) scale(1.1, 0.84)`, offset: 0.34, easing: 'ease-out' },
-    { transform: `translate(${dx / 2}px, ${dy / 2 - h}px) scale(0.94, 1.08)`, offset: 0.66, easing: 'ease-in' },
-    { transform: 'translate(0, 0) scale(1.12, 0.86)', offset: 0.92 },
+    { transform: 'translate(0, 0)', offset: 0 },
+    { transform: 'translate(-12px, 0)', offset: 0.12 },
+    { transform: 'translate(12px, 0)', offset: 0.26 },
+    { transform: 'translate(-9px, 0)', offset: 0.4 },
+    { transform: 'translate(9px, 0)', offset: 0.54 },
+    { transform: 'translate(-4px, 0) scale(1.06, 0.92)', offset: 0.7 },
     { transform: 'translate(0, 0) scale(1, 1)', offset: 1 },
   ];
 }
@@ -67,8 +66,8 @@ function LaneRabbit({ lane }: { lane: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const last = useRef<[number, number] | null>(null);
   const played = useRef('');
-  const moving = phase === 'hopping' || phase === 'returning' || phase === 'toGarden';
-  const pose: Pose = phase === 'returning' ? 'hurt' : moving ? 'jump' : 'stand';
+  const moving = phase === 'hopping' || phase === 'hurt' || phase === 'toGarden';
+  const pose: Pose = phase === 'hurt' ? 'hurt' : moving ? 'jump' : 'stand';
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -90,8 +89,8 @@ function LaneRabbit({ lane }: { lane: number }) {
     const dy = from ? from[1] - el.offsetTop : 0;
     const dist = Math.hypot(dx, dy);
     const h = Math.min(130, 45 + dist * 0.18);
-    const frames = phase === 'returning' ? returnFrames(dx, dy, h) : hopFrames(dx, dy, h);
-    const duration = (phase === 'returning' ? 700 : 450) + Math.min(600, dist * 0.6);
+    const frames = phase === 'hurt' ? hurtFrames() : hopFrames(dx, dy, h);
+    const duration = phase === 'hurt' ? 600 : 450 + Math.min(600, dist * 0.6);
     el.animate(frames, { duration }).onfinish = finish;
   }, [mode, pos, moving, phase, mistakes, lane]);
 

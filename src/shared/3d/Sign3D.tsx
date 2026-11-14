@@ -18,6 +18,8 @@ interface Props {
   twoSided?: boolean;
   /** Biển gỗ có vân và nẹp viền (bỏ qua `bg`). */
   wood?: boolean;
+  /** Dòng chính: mỗi chữ một màu cầu vồng, viền trắng (bỏ qua `color`). */
+  rainbow?: string[];
   position?: [number, number, number];
   rotation?: [number, number, number];
 }
@@ -37,6 +39,7 @@ export function Sign3D({
   billboard = true,
   twoSided = false,
   wood = false,
+  rainbow,
   position,
   rotation,
 }: Props) {
@@ -113,8 +116,25 @@ export function Sign3D({
     g.textAlign = 'center';
     g.textBaseline = 'middle';
     g.font = font;
-    g.fillStyle = color;
-    g.fillText(text, w / 2, px * 0.82);
+    if (rainbow) {
+      // từng chữ một màu, viền trắng dày cho nổi trên nền gỗ
+      g.textAlign = 'left';
+      g.shadowColor = 'transparent';
+      g.lineJoin = 'round';
+      g.lineWidth = px * 0.16;
+      g.strokeStyle = '#ffffff';
+      let x = (w - g.measureText(text).width) / 2;
+      [...text].forEach((ch, i) => {
+        g.strokeText(ch, x, px * 0.82);
+        g.fillStyle = rainbow[i % rainbow.length];
+        g.fillText(ch, x, px * 0.82);
+        x += g.measureText(ch).width;
+      });
+      g.textAlign = 'center';
+    } else {
+      g.fillStyle = color;
+      g.fillText(text, w / 2, px * 0.82);
+    }
     if (sub) {
       g.font = subFont;
       g.fillStyle = subColor;
@@ -126,7 +146,7 @@ export function Sign3D({
     return { texture: t, aspect: w / h };
     // vẽ lại khi phông chữ đã tải xong
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, sub, bg, border, color, subColor, wood, fontsReady]);
+  }, [text, sub, bg, border, color, subColor, wood, rainbow, fontsReady]);
 
   useEffect(() => () => texture.dispose(), [texture]);
 

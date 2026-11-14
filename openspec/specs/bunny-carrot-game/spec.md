@@ -36,19 +36,19 @@ Số cà rốt cần nhặt K của mỗi làn SHALL bằng đúng số ô có k
 - **THEN** thỏ nhảy lên ô 6−3, ô hiện "6 − 3 = 3" và được đánh dấu đã qua, điểm cà rốt không đổi
 
 ### Requirement: Chọn ô sai
-Khi câu trả lời không khớp với ô (Đúng khi kết quả khác N, hoặc Sai khi kết quả bằng N), ô đó SHALL báo nhầm (rung và đỏ), thỏ về vạch xuất phát, và mọi ô trên làn trở về trạng thái chưa trả lời. Điểm cà rốt của làn về 0 và giọng đọc phát lời động viên.
+Khi câu trả lời không khớp với ô (Đúng khi kết quả khác N, hoặc Sai khi kết quả bằng N), ô đó SHALL báo nhầm (rung và đỏ), thỏ rung tại chỗ và đứng yên ở ô đang đứng (MUST NOT về vạch xuất phát). Các ô đã qua và điểm cà rốt của làn giữ nguyên, số lần nhầm tăng 1, và giọng đọc phát lời động viên. Học sinh trả lời lại chính ô vừa nhầm.
 
 #### Scenario: Chọn 6−3 sau khi đã tìm 2 ô
 - **WHEN** thỏ đã qua ô 5−1 và ô 9−6, ô trước mặt là 6−3, mục tiêu là 4, và học sinh bấm Đúng
-- **THEN** ô 6−3 rung đỏ, thỏ nhảy về vạch xuất phát, ô 5−1 và 9−6 trở về chưa trả lời, điểm cà rốt về 0, và giọng đọc phát lời động viên
+- **THEN** ô 6−3 rung đỏ, thỏ vẫn đứng ở ô 9−6, ô 5−1 và 9−6 vẫn đánh dấu đã qua, điểm cà rốt giữ nguyên, và giọng đọc phát lời động viên
 
 #### Scenario: Bấm Sai ở ô bằng mục tiêu
 - **WHEN** ô trước mặt là 7−3, mục tiêu là 4, và học sinh bấm Sai
-- **THEN** ô 7−3 rung đỏ và thỏ về vạch xuất phát
+- **THEN** ô 7−3 rung đỏ, thỏ đứng tại chỗ, và ô trước mặt vẫn là 7−3
 
 #### Scenario: Chọn đúng sau khi sai
-- **WHEN** thỏ vừa về vạch xuất phát sau một lần nhầm, ô đầu tiên của làn là 5−1, mục tiêu là 4, và học sinh bấm Đúng
-- **THEN** thỏ nhảy từ vạch xuất phát lên ô 5−1
+- **WHEN** thỏ vừa nhầm ở ô 6−3 (đang đứng ở ô 9−6), mục tiêu là 4, và học sinh bấm Sai
+- **THEN** thỏ nhảy từ ô 9−6 lên ô 6−3, ô hiện "6 − 3 = 3"
 
 ### Requirement: Không nhận thao tác trong lúc thỏ đang nhảy
 Trong lúc bất kỳ con thỏ nào đang nhảy, màn chơi SHALL bỏ qua mọi lần bấm Đúng hoặc Sai, kể cả trên làn khác.
@@ -95,7 +95,7 @@ Màn chơi SHALL có hai nút chọn chế độ "1 người" và "2 đội". M�
 
 #### Scenario: Sai xong đổi lượt
 - **WHEN** đang là lượt Đội Xanh và Đội Xanh trả lời nhầm
-- **THEN** thỏ xanh về vạch xuất phát, rồi lượt chuyển sang Đội Đỏ
+- **THEN** thỏ xanh rung tại chỗ và đứng yên ở ô đang đứng, rồi lượt chuyển sang Đội Đỏ
 
 #### Scenario: Bấm vào làn không có lượt
 - **WHEN** đang là lượt Đội Đỏ và có người bấm nút Đúng hoặc Sai trên làn Đội Xanh

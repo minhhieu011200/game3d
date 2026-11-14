@@ -1,23 +1,28 @@
 import { create } from 'zustand';
-import { audio, sfx } from '../../audio/AudioManager';
-import { randomPraise, randomRetry } from '../../audio/voiceLines';
+import { dockById } from './boat';
 import { resetBoat, sailTo } from './boatRuntime';
 import { emitEffect } from './effects';
 import { initialObjects } from './layout';
-import { attachToSlot, deleteObject, moveObject, toggleCandle, zoneAt, type Kind, type ZooObject } from './logic';
-import { chooseAnswer, initialStudent, onSceneChange, TASKS, taskProgress, type StudentState } from './tasks';
+import { attachToSlot, deleteObject, moveObject, toggleCandle, zoneAt, type ZooObject } from './logic';
 import { resetWheel } from './wheelRuntime';
-import { reportDone } from '../../tour/gateBridge';
+import { riverCenterZ, RIVER_HALF_WIDTH, SKY_Y, WATER_Y } from './world';
+
+/** Hành động ở mỗi bến: bấm nút thì `count` bạn cùng lúc nhảy xuống hồ / bay lên trời (phép tính 10 − count). */
+export const ACTIONS = {
+  frog: { dock: 'frogs', count: 5, label: '🐸 Nhảy' },
+  stork: { dock: 'storks', count: 2, label: '🕊️ Bay' },
+} as const;
+export type ActKind = keyof typeof ACTIONS;
+const NONE: Record<ActKind, boolean> = { frog: false, stork: false };
 
 interface ZooStore {
   objects: ZooObject[];
   selected: string | null;
   dragging: string | null;
-  /** Bảng đếm của từng loại đã được bấm "Hiện đáp án" chưa. */
-  revealed: Record<Kind, boolean>;
-  student: StudentState;
-  /** Câu nhắc khi làm thừa, ví dụ "Nhiều quá rồi!…". */
-  hint: string | null;
+  /** Đã bấm nút hành động của bến (ếch nhảy / cò bay). */
+  acted: Record<ActKind, boolean>;
+  /** Đã bấm "Đáp án" của bến đó. */
+  answered: Record<ActKind, boolean>;
 
   reset(): void;
   select(id: string | null): void;
@@ -27,59 +32,33 @@ interface ZooStore {
   dropOnWheel(id: string, slot: number): void;
   remove(id: string): void;
   toggleCandle(id: string): void;
-  reveal(kind: Kind): void;
-  answer(choice: string): void;
+  /** Bến ếch: 5 bạn ếch cùng nhảy xuống hồ; bến cò: 2 bạn cò cùng bay lên trời. */
+  act(kind: ActKind): void;
+  /** Hiện phép tính đáp án của bến (không tính là qua cổng). */
+  showAnswer(kind: ActKind): void;
   /** Thuyền tự chạy tới bến. */
   travel(id: string): void;
 }
 
 export const useZoo = create<ZooStore>()((set, get) => {
-  /** Sau mỗi thao tác: cập nhật nhiệm vụ học sinh và đọc câu hỏi / lời nhắc. */
-  const afterChange = (objects: ZooObject[]) => {
-    const { student } = get();
-    const next = onSceneChange(student, objects);
-    const task = TASKS[next.taskIndex];
-    let hint: string | null = null;
-    if (next.phase === 'doing') {
-      const p = taskProgress(task, objects);
-      if (p.kind === 'too-many') {
-        hint = task.tooMany(p.extra);
-        if (get().hint !== hint) audio.say(task.voice.tooMany, { interrupt: true });
-      }
-    }
-    if (student.phase !== 'question' && next.phase === 'question') {
-      sfx('correct');
-      audio.say([task.voice.question, 'b4.choose'], { interrupt: true });
-    }
-    set({ objects, student: next, hint });
-  };
-
-  const startStudent = () => {
-    const s = initialStudent();
-    audio.say(['b4.welcome', TASKS[0].voice.task], { interrupt: true });
-    return s;
-  };
+  const afterChange = (objects: ZooObject[]) => set({ objects });
 
   return {
-    // Bài 4 chỉ có một cách chơi: làm lần lượt các nhiệm vụ (bảng đếm bật/tắt riêng).
     objects: initialObjects(),
     selected: null,
     dragging: null,
-    revealed: { frog: false, stork: false, candle: false },
-    student: initialStudent(),
-    hint: null,
+    acted: NONE,
+    answered: NONE,
 
     reset() {
       resetBoat();
       resetWheel();
-      const student = startStudent();
       set({
         objects: initialObjects(),
         selected: null,
         dragging: null,
-        revealed: { frog: false, stork: false, candle: false },
-        student,
-        hint: null,
+        acted: NONE,
+        answered: NONE,
       });
     },
     select(id) {
@@ -92,49 +71,43 @@ export const useZoo = create<ZooStore>()((set, get) => {
       const o = get().objects.find((x) => x.id === id);
       if (!o) return;
       const zone = zoneAt(o.kind, pos);
-      if (zone === 'sky') sfx('whoosh');
-      else if (zone === 'river') sfx('splash');
-      else sfx('pop');
       if (zone === 'river') emitEffect('splash', [pos[0], pos[1], pos[2]]);
       if (o.kind === 'stork' && zone === 'sky' && o.zone !== 'sky') emitEffect('feathers', o.pos);
       afterChange(moveObject(get().objects, id, pos, zone));
     },
     dropOnWheel(id, slot) {
-      sfx('pop');
       afterChange(attachToSlot(get().objects, id, slot));
     },
     remove(id) {
-      sfx('puff');
       set({ selected: null });
       afterChange(deleteObject(get().objects, id));
     },
     toggleCandle(id) {
-      sfx('puff');
       afterChange(toggleCandle(get().objects, id));
     },
-    reveal(kind) {
-      set({ revealed: { ...get().revealed, [kind]: !get().revealed[kind] } });
+    act(kind) {
+      if (get().acted[kind]) return;
+      set({ acted: { ...get().acted, [kind]: true } });
+      // chọn các bạn đứng gần thuyền (giữa khung hình) để không bị các nút hai bên che
+      const dockX = dockById(ACTIONS[kind].dock).x;
+      const movers = get()
+        .objects.filter((o) => o.kind === kind && !o.deleted && o.zone === 'ground')
+        .sort((p, q) => Math.abs(p.pos[0] - dockX) - Math.abs(q.pos[0] - dockX))
+        .slice(0, ACTIONS[kind].count);
+      // cả nhóm cùng lúc: ếch rơi xuống nước sát bờ, cò bay thẳng lên trời
+      for (const o of movers) {
+        const x = o.pos[0];
+        get().drop(
+          o.id,
+          kind === 'frog'
+            ? [x, WATER_Y, riverCenterZ(x) + RIVER_HALF_WIDTH * 0.82]
+            : // cò bay vừa qua mức "bầu trời", ra phía trên mặt sông gần thuyền cho dễ thấy
+              [x, SKY_Y + 0.6, riverCenterZ(x) - RIVER_HALF_WIDTH * 0.95],
+        );
+      }
     },
-    answer(choice) {
-      const { student, objects } = get();
-      const r = chooseAnswer(student, objects, choice);
-      if (student.phase !== 'question') return;
-      if (!r.correct) {
-        sfx('wrong');
-        audio.say(randomRetry(), { interrupt: true });
-        return set({ student: r.state });
-      }
-      sfx('correct');
-      if (r.state.phase === 'done') {
-        sfx('win');
-        audio.say([randomPraise(), 'b4.done'], { interrupt: true });
-        reportDone();
-      } else {
-        const t = TASKS[r.state.taskIndex];
-        audio.say([randomPraise(), t.voice.task], { interrupt: true });
-        get().travel(t.waypoint);
-      }
-      set({ student: r.state });
+    showAnswer(kind) {
+      set({ answered: { ...get().answered, [kind]: true } });
     },
     travel(id) {
       sailTo(id);
