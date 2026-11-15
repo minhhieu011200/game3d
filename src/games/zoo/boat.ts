@@ -45,9 +45,9 @@ export const DOCKS: Dock[] = [
   // nhìn từ cao xuống để thuyền và các bạn nhỏ không che các bạn ếch trên bờ và dưới nước
   { id: 'frogs', label: '🐸 Bến ếch', x: frogX, look: [frogX, riverCenterZ(frogX) + RIVER_HALF_WIDTH + 2], polar: 0.95 },
   // nhìn gần ngang để thấy cả bầu trời khi các bạn cò bay lên (không giữ góc nhìn từ cao của bến ếch)
-  { id: 'storks', label: '🕊️ Bến cò', x: storkX, look: [storkX, riverCenterZ(storkX) - RIVER_HALF_WIDTH - 3], polar: 1.3 },
+  { id: 'storks', label: '🕊️ Bến cò', x: storkX, look: [storkX, riverCenterZ(storkX) - RIVER_HALF_WIDTH - 3], polar: 1.1 },
   // bến trứng ở cuối sông (chỗ vòng quay nến cũ): gà mái và ổ 10 quả trứng trên bờ
-  { id: 'eggs', label: '🥚 Bến trứng', x: NEST.x, look: [NEST.x, NEST.z], polar: 0.95 },
+  { id: 'eggs', label: '🥚 Bến trứng', x: NEST.x, look: [NEST.x, NEST.z], polar: 0.6 }, // nhìn cao để thấy đủ các quả trứng, không bị quả trước che
 ];
 
 export function dockById(id: string) {

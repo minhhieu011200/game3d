@@ -91,6 +91,7 @@ export const useZoo = create<ZooStore>()((set, get) => {
     act(kind) {
       if (get().acted[kind]) return;
       set({ acted: { ...get().acted, [kind]: true } });
+      sfx(kind === 'frog' ? 'frog' : kind === 'stork' ? 'stork' : 'hatch');
       // chọn các bạn đứng gần thuyền (giữa khung hình) để không bị các nút hai bên che
       const dockX = dockById(ACTIONS[kind].dock).x;
       const movers = get()

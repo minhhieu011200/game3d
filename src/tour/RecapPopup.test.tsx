@@ -98,7 +98,7 @@ test('Bài 1: popup hiện dòng hoa như bảng Hoàn thành Vườn Hoa, bấm
   expect(lines[2].querySelector('.b1-line-eq')!.textContent).toBe('6 − 3 = 3');
 });
 
-test('Bài 2: ô bằng mục tiêu có 🥕, ô khác mục tiêu có ✘ (không phải ✔)', () => {
+test('Bài 2: thẻ giống phiếu bài tập – ô bằng mục tiêu tích Đúng, ô khác tích Sai, ô chưa làm "?" bấm thì hiện', () => {
   act(() => {
     useApp.setState({ screen: 'bunny', gate: 'bunny' });
     useTour.setState({
@@ -108,7 +108,53 @@ test('Bài 2: ô bằng mục tiêu có 🥕, ô khác mục tiêu có ✘ (khô
     });
   });
   render(<RecapPopup gate="bunny" />);
-  const marks = Array.from(document.querySelectorAll('.rp-row')).map((e) => e.querySelector('.rp-mark')!.textContent);
-  expect(marks).toEqual(['🥕', '✘', '']);
-  expect(document.body.textContent).not.toContain('✔');
+  const ticks = () =>
+    Array.from(document.querySelectorAll('.ws-card')).map((e) => Array.from(e.querySelectorAll('.ws-box')).map((b) => b.textContent));
+  expect(ticks()).toEqual([
+    ['✓', ''],
+    ['', '✓'],
+    ['', ''],
+  ]);
+  expect(document.querySelectorAll('.ws-res')[2].textContent).toBe('?');
+  fireEvent.click(screen.getByLabelText('Xem đáp án 8 trừ 4'));
+  expect(document.querySelectorAll('.ws-res')[2].textContent).toBe('4');
+  expect(ticks()[2]).toEqual(['✓', '']);
+});
+
+test('Bài 4: kết quả như phiếu nối – có đáp án thì có kết quả và đường nối tới đúng hình; "?" bấm thì hiện', () => {
+  act(() => {
+    useApp.setState({ screen: 'zoo', gate: 'pond' });
+    useTour.setState({
+      at: 4,
+      recapOpen: true,
+      recap: {
+        columns: [
+          {
+            rows: [
+              { a: 10, b: 5, done: true, icon: '🐸' },
+              { a: 10, b: 2, done: false, icon: '🕊️' },
+              { a: 10, b: 3, done: false, icon: '🐣' },
+            ],
+          },
+        ],
+      },
+    });
+  });
+  render(<RecapPopup gate="pond" />);
+  expect(Array.from(document.querySelectorAll('.mt-pic img')).map((e) => e.getAttribute('src'))).toEqual([
+    './images/bai4-trung.png',
+    './images/bai4-ech.png',
+    './images/bai4-co.png',
+  ]);
+  const lines = () => Array.from(document.querySelectorAll('.mt-lines line')).map((l) => [l.getAttribute('y1'), l.getAttribute('y2')]);
+  // ếch (dòng 1) nối tới hình ếch (hình thứ 2)
+  expect(lines()).toEqual([['50', '150']]);
+  // kết quả luôn hiện, kể cả phép chưa có đáp án
+  expect(Array.from(document.querySelectorAll('.mt-res')).map((e) => e.textContent)).toEqual(['5', '8', '7']);
+  fireEvent.click(screen.getByLabelText('Xem đường nối 10 trừ 3'));
+  // trứng (dòng 3) nối tới hình trứng (hình thứ 1)
+  expect(lines()).toEqual([
+    ['50', '150'],
+    ['250', '50'],
+  ]);
 });

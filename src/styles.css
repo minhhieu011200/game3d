@@ -1836,6 +1836,213 @@ button.rp-row {
   color: var(--orange);
 }
 /* Bài 3: bảng trừ hàng dọc như SGK */
+/* Bài 2: thẻ giống Phiếu bài tập số 1 */
+.ws-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45em 0.6em;
+  list-style: none;
+  margin: 0.3em 0 0;
+  padding: 0;
+}
+.ws-li {
+  display: contents;
+}
+.ws-card {
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 3px solid #ffc078;
+  border-radius: 0.7em;
+  padding: 0.3em 0.6em 0.4em;
+  animation: pop-in 0.35s both;
+}
+button.ws-card {
+  cursor: pointer;
+}
+.ws-card.pending {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.ws-card.pending:hover {
+  opacity: 0.85;
+}
+.ws-card.revealed {
+  border-color: #74c0fc;
+  background: #f1f8ff;
+}
+.ws-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+}
+.ws-no {
+  flex: none;
+  width: 1.5em;
+  height: 1.5em;
+  line-height: 1.5em;
+  border-radius: 50%;
+  background: #2f9e44;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 800;
+}
+.ws-carrot {
+  flex: none;
+  height: 1.8em;
+  width: auto;
+}
+.ws-eq {
+  font-size: 1.2em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ws-res {
+  display: inline-block;
+  min-width: 0.8em;
+  color: #2f9e44;
+}
+.ws-card.pending .ws-res {
+  color: #888;
+}
+.ws-ticks {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 0.2em;
+  font-size: 0.85em;
+  font-weight: 800;
+}
+.ws-tick {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+.ws-tick.yes {
+  color: #2f9e44;
+}
+.ws-tick.no {
+  color: #e03131;
+}
+.ws-box {
+  display: grid;
+  place-items: center;
+  width: 1.3em;
+  height: 1.3em;
+  border: 3px solid #333;
+  border-radius: 0.25em;
+  background: #fff;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* dòng Họ và tên / Lớp trên phiếu bài tập vẽ trực tiếp */
+.ws-name {
+  display: flex;
+  gap: 1em;
+  padding: 0.6em 1.2em 0;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-align: left;
+}
+.ws-name span {
+  flex: 1;
+  border-bottom: 2px dotted #888;
+  padding-bottom: 0.15em;
+}
+.ws-name span.cls {
+  flex: 0 0 30%;
+}
+
+/* Bài 4: nối phép tính với hình như Phiếu bài tập số 3 */
+.mt {
+  display: grid;
+  grid-template-columns: auto 4.5em auto;
+  grid-template-rows: repeat(3, 1fr);
+  row-gap: 0.5em;
+  align-items: center;
+}
+.mt-eq {
+  grid-column: 1;
+  position: relative;
+  background: #fff;
+  border: 3px solid #74c0fc;
+  border-radius: 0.6em;
+  padding: 0.3em 0.8em;
+  font-size: 1.2em;
+  font-weight: 800;
+  white-space: nowrap;
+  animation: pop-in 0.35s both;
+}
+.mt-eq.pending {
+  border-style: dashed;
+}
+.mt-res {
+  color: #1c6ea4;
+}
+.mt-eq.revealed .mt-res {
+  color: #e8590c;
+}
+button.mt-eq {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.mt-dot {
+  position: absolute;
+  top: 50%;
+  right: -0.45em;
+  width: 0.7em;
+  height: 0.7em;
+  margin-top: -0.35em;
+  border-radius: 50%;
+  background: #1c6ea4;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #1c6ea4;
+}
+.mt-pic {
+  grid-column: 3;
+  position: relative;
+}
+/* ba hình cùng tỉ lệ 2 : 1 nên hiện bằng nhau */
+.mt-pic img {
+  display: block;
+  width: 10.4em;
+  height: 5.2em;
+  object-fit: cover;
+  border: 3px solid #74c0fc;
+  border-radius: 0.5em;
+}
+.mt-pic .mt-dot {
+  z-index: 1;
+}
+/* chấm nối nằm ngoài hình, không đè lên con vật */
+.mt-pic {
+  padding-left: 0.6em;
+}
+.mt-pic .mt-dot {
+  left: -0.45em;
+  right: auto;
+}
+.mt-lines {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mt-lines line {
+  stroke: #1c6ea4;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.mt-lines line.revealed {
+  stroke: #e8590c;
+  stroke-dasharray: 8 6;
+}
+
 .rp-vt {
   border-collapse: collapse;
   font-weight: 800;
@@ -1920,6 +2127,28 @@ button.rp-row {
 }
 
 /* Clip hướng dẫn trước cổng */
+/* Phiếu bài tập (nút cạnh "Qua cổng") */
+/* nằm dưới dải cổng (~64px), viền mỏng để phiếu to nhất có thể */
+.worksheet-overlay {
+  padding-top: 64px;
+}
+.worksheet-box {
+  position: relative;
+  padding: 8px;
+}
+.worksheet-img {
+  display: block;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 92px);
+  border-radius: 10px;
+  background: #fff;
+}
+.worksheet-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
 .guide-video {
   display: block;
   width: min(80vw, calc((100vh - 160px) * 16 / 9));

@@ -3,7 +3,8 @@
  * Trình duyệt chỉ cho phát tiếng sau một lần bấm, nên `unlockSound()` được gọi ở thao tác bấm đầu tiên.
  */
 
-export type Sfx = 'gate' | 'sip' | 'equation' | 'correct' | 'wrong';
+type ToneSfx = 'gate' | 'sip' | 'equation' | 'correct' | 'wrong';
+export type Sfx = ToneSfx | 'frog' | 'stork' | 'hatch';
 
 type Wave = OscillatorType;
 /** [tần số Hz, bắt đầu (s), độ dài (s), dạng sóng, âm lượng, trượt tới tần số] */
@@ -11,7 +12,7 @@ type Note = [freq: number, start: number, dur: number, wave: Wave, vol: number, 
 
 const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
 
-const SFX: Record<Sfx, Note[]> = {
+const SFX: Record<ToneSfx, Note[]> = {
   // vào cổng: chuỗi nốt đi lên lấp lánh
   gate: [72, 76, 79, 84, 88].map((n, i): Note => [midi(n), i * 0.07, 0.35, 'triangle', 0.16]).concat([[midi(96), 0.36, 0.5, 'sine', 0.06]]),
   // bướm hút mật: ba tiếng "chụt" nhỏ rồi một tiếng lấp lánh
@@ -39,6 +40,119 @@ const SFX: Record<Sfx, Note[]> = {
     [midi(67), 0, 0.2, 'triangle', 0.15, midi(66)],
     [midi(63), 0.22, 0.35, 'triangle', 0.15, midi(60)],
   ],
+};
+
+// ---------- Tiếng con vật (Bài 4): tiếng ồn lọc + tiếng kêu rung, gần tiếng thật hơn sóng đơn ----------
+
+let noiseBuf: AudioBuffer | null = null;
+function noiseBuffer(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return noiseBuf;
+}
+
+/** Tiếng ồn trắng qua bộ lọc có tần số trượt từ f0 tới f1: nước bắn, gió cánh, vỏ trứng nứt. */
+function noise(dest: AudioNode, t: number, dur: number, vol: number, type: BiquadFilterType, f0: number, f1: number, q = 1) {
+  const c = ctx!;
+  const src = c.createBufferSource();
+  src.buffer = noiseBuffer(c);
+  const f = c.createBiquadFilter();
+  f.type = type;
+  f.Q.value = q;
+  f.frequency.setValueAtTime(f0, t);
+  f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.012, dur / 4));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(f).connect(g).connect(dest);
+  src.start(t, Math.random() * 0.5);
+  src.stop(t + dur + 0.05);
+}
+
+/** Tiếng ếch "ộp": sóng răng cưa trầm qua lọc dải, rung nhanh (~30 lần/giây) cho ra tiếng rè rè của ếch. */
+function croak(dest: AudioNode, t: number, freq: number, dur: number, vol: number) {
+  const c = ctx!;
+  const osc = c.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freq, t);
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.8, t + dur);
+  const bp = c.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 800;
+  bp.Q.value = 2.5;
+  const am = c.createGain();
+  am.gain.value = 0.5;
+  const lfo = c.createOscillator();
+  lfo.type = 'square';
+  lfo.frequency.value = 32;
+  const depth = c.createGain();
+  depth.gain.value = 0.5;
+  lfo.connect(depth).connect(am.gain);
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  env.gain.setValueAtTime(vol, t + dur * 0.6);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(bp).connect(am).connect(env).connect(dest);
+  for (const o of [osc, lfo]) {
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+}
+
+/** Tiếng gà con "chiếp": lên cao rồi rơi xuống thật nhanh. */
+function peep(dest: AudioNode, t: number, vol: number) {
+  const c = ctx!;
+  const osc = c.createOscillator();
+  osc.type = 'sine';
+  const base = 3000 + Math.random() * 400;
+  osc.frequency.setValueAtTime(base, t);
+  osc.frequency.exponentialRampToValueAtTime(base * 1.4, t + 0.04);
+  osc.frequency.exponentialRampToValueAtTime(base * 1.15, t + 0.1);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+  osc.connect(g).connect(dest);
+  osc.start(t);
+  osc.stop(t + 0.15);
+}
+
+type AnimalSfx = 'frog' | 'stork' | 'hatch';
+const ANIMALS: Record<AnimalSfx, (d: AudioNode, at: number, k: number) => void> = {
+  // các con vật làm cùng lúc nên là một lượt chung, tiếng chồng lên nhau (lệch vài phần trăm giây cho tự nhiên)
+  // ếch cùng nhảy: dàn "ộp ộp" rồi một tiếng "tõm" lớn
+  frog: (d, at, k) => {
+    for (let i = 0; i < 5; i++) {
+      const j = Math.random() * 0.04;
+      croak(d, at + j, 190 + i * 15, 0.13, 0.12 * k);
+      croak(d, at + 0.16 + j, 175 + i * 15, 0.15, 0.12 * k);
+    }
+    noise(d, at + 0.36, 0.45, 0.5 * k, 'lowpass', 3500, 250);
+    tone(d, [480, 0, 0.16, 'sine', 0.18 * k, 140], at + 0.36);
+  },
+  // cò cùng bay: "phạch phạch" vỗ cánh rồi mỏ gõ lách cách
+  stork: (d, at, k) => {
+    for (let i = 0; i < 4; i++) {
+      noise(d, at + i * 0.2, 0.16, 0.4 * k, 'bandpass', 1100, 350, 0.9);
+      noise(d, at + i * 0.2 + 0.03, 0.16, 0.3 * k, 'bandpass', 900, 300, 0.9);
+    }
+    for (let i = 0; i < 10; i++) noise(d, at + 0.9 + i * 0.045, 0.025, 0.25 * k, 'bandpass', 2600, 2200, 4);
+  },
+  // trứng cùng nở: vỏ nứt "rắc" rồi gà con "chiếp chiếp" cùng lúc
+  hatch: (d, at, k) => {
+    noise(d, at, 0.05, 0.45 * k, 'highpass', 3500, 2500, 0.7);
+    noise(d, at + 0.09, 0.06, 0.4 * k, 'bandpass', 2200, 1800, 1.5);
+    for (let i = 0; i < 3; i++) {
+      const j = Math.random() * 0.05;
+      peep(d, at + 0.25 + j, 0.06 * k);
+      peep(d, at + 0.4 + j, 0.06 * k);
+    }
+  },
 };
 
 // Nhạc nền tự sáng tác: giai điệu Đô trưởng, 8 ô nhịp lặp lại. [nốt MIDI (0 = nghỉ), số móc đơn]
@@ -172,6 +286,7 @@ export function unlockSound() {
 export function sfx(name: Sfx, delay = 0) {
   if (!ctx || !prefs.sfx) return;
   const at = ctx.currentTime + delay;
+  if (name === 'frog' || name === 'stork' || name === 'hatch') return ANIMALS[name](ctx.destination, at, SFX_GAIN / 2);
   for (const n of SFX[name]) tone(ctx.destination, [n[0], n[1], n[2], n[3], n[4] * SFX_GAIN, n[5]], at);
 }
 

@@ -1,6 +1,7 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { TopBarRight } from '../app/TopBar';
+import { setInGame } from '../shared/sound';
 import { useQuality } from '../shared/3d/quality';
 import { enterGate } from './gateBridge';
 import { canAdvance, current, isGate, SQUARE, STATIONS } from './logic';
@@ -13,6 +14,12 @@ export default function TourScreen() {
   const q = useQuality();
   const [mapOpen, setMapOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  // đang xem clip hướng dẫn thì nhạc nền nghỉ để nghe rõ tiếng trong clip
+  useEffect(() => {
+    if (!guideOpen) return;
+    setInGame(true);
+    return () => setInGame(false);
+  }, [guideOpen]);
   const st = current(s);
   const atSquare = s.at === SQUARE && s.phase === 'atGate';
 
