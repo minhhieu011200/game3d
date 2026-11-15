@@ -290,14 +290,14 @@ export function sfx(name: Sfx, delay = 0) {
   for (const n of SFX[name]) tone(ctx.destination, [n[0], n[1], n[2], n[3], n[4] * SFX_GAIN, n[5]], at);
 }
 
-let noiseBuf: AudioBuffer | null = null;
+let fwNoise: AudioBuffer | null = null;
 /** Vang ngoài trời: tiếng nổ dội lại kéo dài vài giây như pháo hoa thật. */
 let fwBus: AudioNode | null = null;
 
 function fireworkBus(c: AudioContext) {
   if (fwBus) return fwBus;
-  noiseBuf = c.createBuffer(1, c.sampleRate * 3, c.sampleRate);
-  const d = noiseBuf.getChannelData(0);
+  fwNoise = c.createBuffer(1, c.sampleRate * 4, c.sampleRate);
+  const d = fwNoise.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   // xung vang 3,5 giây: tiếng ồn tắt dần, hai kênh khác nhau cho rộng
   const len = c.sampleRate * 3.5;
@@ -325,7 +325,7 @@ export function firework(rise: number) {
     const src = c.createBufferSource();
     const filter = c.createBiquadFilter();
     const gain = c.createGain();
-    src.buffer = noiseBuf;
+    src.buffer = fwNoise;
     filter.type = type;
     filter.frequency.setValueAtTime(from, at);
     filter.frequency.exponentialRampToValueAtTime(to, at + dur);
