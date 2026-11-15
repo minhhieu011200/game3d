@@ -7,11 +7,11 @@ Trò chơi bài 3 (SGK Toán 1 tr.73): máy hiện phép trừ, học sinh giơ 
 ## Requirements
 
 ### Requirement: Bộ câu hỏi
-Trò chơi SHALL lần lượt hỏi các phép 9−1, 9−2, 9−3, 9−4, 9−5, 9−6, 9−7, 9−8. Mỗi câu hiện dạng "9 − a = ?" bằng chữ to, và giọng đọc đọc phép tính. Bộ câu hỏi được định nghĩa bằng dữ liệu.
+Trò chơi SHALL lần lượt hỏi các phép 9−1, 9−2, 9−3, 9−4, 9−5, 9−6, 9−7, 9−8. Mỗi câu hiện dạng "9 − a = ?" bằng chữ to. Bộ câu hỏi được định nghĩa bằng dữ liệu.
 
 #### Scenario: Câu đầu tiên
 - **WHEN** học sinh bắt đầu bài 3
-- **THEN** màn hình hiện "9 − 1 = ?" và giọng đọc đọc "Chín trừ một bằng mấy?"
+- **THEN** màn hình hiện "9 − 1 = ?"
 
 ### Requirement: Hiển thị số ngón đang nhận
 Trò chơi SHALL luôn hiển thị số ngón đang nhận diện được, kèm thanh tiến trình thời gian giữ. Học sinh nhờ đó biết máy đang "thấy" gì.
@@ -21,15 +21,15 @@ Trò chơi SHALL luôn hiển thị số ngón đang nhận diện được, kè
 - **THEN** màn hình hiện "Bạn đang giơ: 5" và thanh tiến trình đầy dần
 
 ### Requirement: Chốt đáp án bằng ngón tay
-Khi bộ nhận diện chốt một giá trị, trò chơi SHALL so giá trị đó với kết quả đúng. Đúng thì khen, hiện phép tính đầy đủ (ví dụ "9 − 3 = 6") rồi sang câu kế tiếp. Sai thì báo sai, đọc lời động viên và chờ học sinh trả lời lại cùng câu đó.
+Khi bộ nhận diện chốt một giá trị, trò chơi SHALL so giá trị đó với kết quả đúng. Đúng thì hiện "🎉 Đúng rồi!" cùng phép tính đầy đủ (ví dụ "9 − 3 = 6") rồi sang câu kế tiếp. Sai thì phép tính rung và hiện "Chưa đúng, thử lại nhé!", rồi chờ học sinh trả lời lại cùng câu đó.
 
 #### Scenario: Trả lời đúng
 - **WHEN** câu hỏi là 9 − 3 và học sinh giữ 6 ngón 0,7 giây
-- **THEN** màn hình hiện "9 − 3 = 6" kèm hiệu ứng đúng, phát lời khen, rồi chuyển sang câu 9 − 4
+- **THEN** màn hình hiện "9 − 3 = 6" kèm hiệu ứng đúng và chữ "🎉 Đúng rồi!", rồi chuyển sang câu 9 − 4
 
 #### Scenario: Trả lời sai
 - **WHEN** câu hỏi là 9 − 3 và học sinh giữ 5 ngón 0,7 giây
-- **THEN** màn hình báo sai, phát "Thử lại nhé!" và vẫn giữ câu 9 − 3
+- **THEN** phép tính rung, màn hình hiện "Chưa đúng, thử lại nhé!" và vẫn giữ câu 9 − 3
 
 #### Scenario: Không chốt lặp lại
 - **WHEN** học sinh vừa trả lời sai bằng 5 ngón và vẫn giữ nguyên 5 ngón
@@ -47,4 +47,4 @@ Sau câu cuối, trò chơi SHALL hiện bảng tổng kết. Bảng gồm 8 ph�
 
 #### Scenario: Hoàn thành 8 câu
 - **WHEN** học sinh trả lời đúng câu 9 − 8
-- **THEN** hiện bảng tổng kết với đủ 8 phép tính và kết quả, và phát lời khen
+- **THEN** hiện bảng "Hoàn thành!" với đủ 8 phép tính và kết quả

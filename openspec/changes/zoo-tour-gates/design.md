@@ -119,3 +119,14 @@ Bốn cổng tham quan dùng chung một khung cổng vòm (`src/tour/Gates.tsx`
 
 ### 4d. Bố cục một chỗ, có kiểm tra chồng lấn
 Vị trí các vật lớn của màn đường đi nằm trong `src/tour/layout.ts` (toạ độ cục bộ theo điểm trên đường, đổi sang toạ độ thế giới bằng `toWorld`). Mỗi vật có một vùng chiếm chỗ hình tròn trên mặt đất. `layout.test.ts` kiểm tra không vật nào đè nhau, thú và bụi hoa nằm ngoài hàng rào, xe buýt và biển lớp không lấn đường. Cây được rải ngẫu nhiên có hạt giống cố định nhưng loại bỏ chỗ chồng lên vật hoặc nằm trên đường nhìn từ camera (ở mỗi điểm dừng) tới các vật của điểm đó, nên không còn cây che thú hay cổng.
+
+## Thay đổi sau khi triển khai
+
+Các quyết định ở trên là lúc bắt đầu change. Sau đó giáo viên dùng thử và yêu cầu đổi; spec của change đã được cập nhật theo:
+
+- **Thứ tự cổng** đổi về theo số bài: Cổng N mở Bài N. Trạm soát vé (Bài 3) thành Cổng 3, nên 8 đèn soát vé nằm ở Cổng 3. Mục "[Đánh đổi] Thứ tự cổng (3 → 1 → 2 → 4)" không còn áp dụng.
+- **Bỏ toàn bộ âm thanh**: đã xóa `src/audio/`, `public/audio/` và mọi chỗ gọi `audio.say(...)`. Các mục về `voiceLines.ts`, MP3 và `export-voice-lines.mjs` không còn áp dụng. Vẹt Xanh không còn bong bóng thoại.
+- **Bài 1** đổi từ học sinh tự bấm hoa và chọn viên đá số sang trình chiếu từng bước (`advance()` trong `src/games/flower/logic.ts`, bấm chuột hoặc phím Next).
+- **Popup bảng phép tính** (`RecapPopup.tsx`, từ change `gate-recap-board`): trò chơi báo `reportRecap(...)`, store tour giữ `recap` của cổng đang chơi và lưu vào `recaps` khi qua cổng. Bài 1 và Bài 2 ẩn màn kết thúc riêng khi mở từ cổng để không đè popup.
+- **Quảng Trường**: hai bảng gỗ thay chỗ tường rào hai bên cổng chúc mừng, mỗi cổng một cột phép tính lấy từ `recaps`; pháo hoa bắn ở giữa cổng.
+- **Bài 4**: bỏ vòng quay nến và các nhiệm vụ; mỗi bến có một nút hành động (Nhảy, Bay, Nở) và nút "Đáp án" (xem spec `zoo-counting-scene`). Cổng 4 đổi tên thành "Ếch Nhảy, Cò Bay, Trứng Nở". Trang trí Cổng 4 trên đường đi vẫn còn nến và vòng quay nhỏ.

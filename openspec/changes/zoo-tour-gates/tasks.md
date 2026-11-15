@@ -78,8 +78,11 @@
 - [x] 6.1 Tạo MP3 cho mọi khóa mới (`b1.*`, `tour.*`) bằng cùng giọng bé gái, đặt vào `public/audio/voice/`. Kiểm bằng `node scripts/export-voice-lines.mjs --check` không báo thiếu file.
 - [x] 6.2 Cập nhật `release/HUONG-DAN.txt`, `README.md` (bảng bài: thêm Bài 1 và luồng tham quan) và `AboutScreen.tsx`. Kiểm bằng cách đọc lại: có đủ tên 4 cổng, cách dùng "Đi tiếp / Vào cổng / Qua cổng / Bản đồ".
 - [ ] 6.3 Kiểm tra cả luồng trên bản đóng gói: chạy `npm run package`, mở `TroChoiToan1/start.bat` lúc ngắt mạng, rồi đi lần lượt Cổng 1 → quảng trường. Xác nhận các điểm sau:
-  - mỗi cổng mở đúng bài;
-  - đèn soát vé sáng dần;
+  - mỗi cổng mở đúng bài (Cổng N mở Bài N);
+  - đèn soát vé ở Cổng 3 sáng dần;
+  - popup bảng phép tính hiện khi chơi xong và khi bấm "Qua cổng";
+  - hai bảng gỗ ở quảng trường ghi đúng phép tính các cổng đã qua;
+  - không phát ra tiếng nào;
   - "Qua cổng" mở cánh cổng;
   - Bản đồ nhảy được tới cổng bất kỳ;
   - "Về đường đi" không đánh dấu cổng đã qua;
