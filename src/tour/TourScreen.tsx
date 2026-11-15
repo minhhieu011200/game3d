@@ -12,6 +12,7 @@ export default function TourScreen() {
   const s = useTour();
   const q = useQuality();
   const [mapOpen, setMapOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const st = current(s);
   const atSquare = s.at === SQUARE && s.phase === 'atGate';
 
@@ -37,6 +38,11 @@ export default function TourScreen() {
             🚪 Vào cổng
           </button>
         )}
+        {s.phase === 'atGate' && st.id === 'ticket' && (
+          <button className="btn btn-big" onClick={() => setGuideOpen(true)}>
+            🎬 Xem hướng dẫn
+          </button>
+        )}
         {canAdvance(s) && (
           <button className="btn btn-big" onClick={s.advance}>
             Đi tiếp ▶
@@ -50,6 +56,16 @@ export default function TourScreen() {
       </div>
 
       {mapOpen && <TourMap onClose={() => setMapOpen(false)} />}
+      {guideOpen && (
+        <div className="overlay" onClick={() => setGuideOpen(false)}>
+          <div className="overlay-box wood-panel pop-in" onClick={(e) => e.stopPropagation()}>
+            <video className="guide-video" src="./videos/huong-dan-cong3.mp4" controls autoPlay playsInline />
+            <button className="btn" onClick={() => setGuideOpen(false)}>
+              ✖ Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

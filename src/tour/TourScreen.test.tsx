@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useApp } from '../app/store';
 import { GateBanner } from './GateBanner';
-import { initialTour, SQUARE } from './logic';
+import { initialTour, SQUARE, STATIONS } from './logic';
 import { useTour } from './store';
 import TourScreen from './TourScreen';
 
@@ -73,3 +73,17 @@ test('dải các cổng khác không có đèn soát vé', () => {
   expect(screen.getByText(/Vườn Hoa Bướm Xinh/)).toBeTruthy();
 });
 
+
+test('trước Cổng 3: nút Xem hướng dẫn mở clip, cổng khác không có', () => {
+  act(() => useTour.setState({ at: 1, phase: 'atGate' }));
+  const { unmount } = render(<TourScreen />);
+  expect(screen.queryByText(/Xem hướng dẫn/)).toBeNull();
+  unmount();
+  const ticket = STATIONS.findIndex((st) => st.id === 'ticket');
+  act(() => useTour.setState({ at: ticket, phase: 'atGate' }));
+  render(<TourScreen />);
+  fireEvent.click(screen.getByText(/Xem hướng dẫn/));
+  expect(document.querySelector('video')?.getAttribute('src')).toBe('./videos/huong-dan-cong3.mp4');
+  fireEvent.click(screen.getByText(/Đóng/));
+  expect(document.querySelector('video')).toBeNull();
+});
