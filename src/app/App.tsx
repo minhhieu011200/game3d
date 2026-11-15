@@ -16,8 +16,8 @@ const ZooGame = lazy(() => import('../games/zoo/ZooGame'));
 export function App() {
   const screen = useApp((s) => s.screen);
   const gate = useApp((s) => s.gate);
-  // nhạc nền chỉ phát ở màn chào và trên đường đi; vào trò chơi thì nghỉ
-  useEffect(() => setInGame(!['home', 'tour', 'about'].includes(screen)), [screen]);
+  // nhạc nền chỉ phát trên đường đi (bắt đầu từ trước cổng chào khu vui chơi); màn chào và trong trò chơi thì không
+  useEffect(() => setInGame(screen !== 'tour'), [screen]);
   const content = (
     <Suspense fallback={<div className="loading">Đang tải…</div>}>
       {screen === 'home' && <HomeScreen />}
