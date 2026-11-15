@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useApp } from '../../app/store';
+import { sfx } from '../../shared/sound';
 import { PassGateButton, reportDone, reportRecap } from '../../tour/gateBridge';
 import { advance, answerOf, initialState, pickedOf, type FlowerState } from './logic';
 import { QUESTIONS, type Question } from './questions';
@@ -78,6 +79,10 @@ export default function FlowerGame() {
     if (n === cur) return;
     sRef.current = n;
     setS(n);
+    // bướm bay tới hoa mất ~0,7 giây rồi mới hút mật
+    if (n.step === 1) sfx('sip', 0.6);
+    if (n.step === 2) sfx('equation');
+    if (n.step === 3) sfx('correct');
     if (n.finished) reportDone();
   }, []);
   useEffect(() => {

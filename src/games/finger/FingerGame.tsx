@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CameraView } from '../../hand/CameraView';
 import { useHandTracker } from '../../hand/useHandTracker';
+import { sfx } from '../../shared/sound';
 import { PassGateButton, reportDone, reportProgress, reportRecap } from '../../tour/gateBridge';
 import { answer, answerOf, initialState, next, type FingerState } from './logic';
 import { QUESTIONS } from './questions';
@@ -22,6 +23,7 @@ export default function FingerGame() {
     if (r.event === 'ignored') return;
     sRef.current = r.state;
     setS(r.state);
+    sfx(r.event === 'correct' ? 'correct' : 'wrong');
     if (r.event === 'correct') {
       reportProgress(r.state.index + 1);
       window.setTimeout(() => {
@@ -29,6 +31,7 @@ export default function FingerGame() {
         sRef.current = n;
         setS(n);
         if (n.finished) reportDone();
+        else sfx('equation');
       }, NEXT_DELAY_MS);
     } else {
       setShake((k) => k + 1);

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { sfx } from '../../shared/sound';
 import { reportDone } from '../../tour/gateBridge';
 import { DEFAULT_TARGET, generateRace, type Level, type Mode } from './levels';
 import { allArrived, answer, initialRace, landed, validateLevel, type RaceState } from './logic';
@@ -45,6 +46,8 @@ export const useBunny = create<BunnyStore>()((set, get) => {
     answer(lane, saysEqual) {
       const r = answer(get(), get().levels, lane, saysEqual);
       if (r.event === 'ignored') return;
+      // 'skipped' = em bấm Sai đúng lúc, cũng là trả lời đúng
+      sfx(r.event === 'wrong' ? 'wrong' : 'correct');
       set(r.state);
     },
     landed(lane) {

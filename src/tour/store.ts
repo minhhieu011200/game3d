@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { sfx } from '../shared/sound';
 import * as T from './logic';
 import { defaultRecap, type RecapData } from './recap';
 
@@ -40,7 +41,10 @@ export const useTour = create<TourStore>()((set, get) => {
     recaps: {},
     advance: () => apply(T.advance),
     arrive: () => apply(T.arrive),
-    enter: () => apply(T.enter, { progress: 0, done: false, recap: null, recapOpen: false }),
+    enter: () => {
+      sfx('gate');
+      apply(T.enter, { progress: 0, done: false, recap: null, recapOpen: false });
+    },
     pass: () => {
       const st = T.current(get());
       const recaps = T.isGate(st) ? { ...get().recaps, [st.id]: get().recap ?? defaultRecap(st.id) } : get().recaps;

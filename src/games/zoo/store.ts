@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { dockById } from './boat';
 import { resetBoat, sailTo } from './boatRuntime';
+import { sfx } from '../../shared/sound';
 import { emitEffect } from './effects';
 import { initialObjects } from './layout';
 import { attachToSlot, deleteObject, moveObject, toggleCandle, zoneAt, type ZooObject } from './logic';
@@ -109,6 +110,7 @@ export const useZoo = create<ZooStore>()((set, get) => {
       }
     },
     showAnswer(kind) {
+      sfx('equation');
       set({ answered: { ...get().answered, [kind]: true } });
     },
     travel(id) {
