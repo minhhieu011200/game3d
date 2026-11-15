@@ -29,7 +29,13 @@ function step(s: RaceState, levels: Level[], lane: number, saysEqual: boolean) {
 }
 
 describe('bộ sinh phép tính', () => {
-  test.each(TARGETS)('mục tiêu %i: 7 ô, đúng phạm vi 10, ô đầu đúng', (target) => {
+  test('mục tiêu 4: đúng 6 phép tính của phiếu bài tập, 4 ô đúng', () => {
+    const lv = generateLevel(4, 123);
+    expect(lv.tiles.map((t) => `${t.a}-${t.b}`)).toEqual(['5-1', '7-2', '6-2', '7-3', '8-4', '9-4']);
+    expect(requiredCount(lv)).toBe(4);
+  });
+
+  test.each(TARGETS.filter((t) => t !== 4))('mục tiêu %i: 7 ô, đúng phạm vi 10, ô đầu đúng', (target) => {
     for (let seed = 1; seed <= 40; seed++) {
       const lv = generateLevel(target, seed);
       expect(lv.tiles).toHaveLength(7);
@@ -47,7 +53,7 @@ describe('bộ sinh phép tính', () => {
     }
   });
 
-  test.each([2, 4, 6, 7, 8])('mục tiêu %i: các phép đúng không lặp lại', (target) => {
+  test.each([2, 6, 7, 8])('mục tiêu %i: các phép đúng không lặp lại', (target) => {
     for (let seed = 1; seed <= 40; seed++) {
       const lv = generateLevel(target, seed);
       const right = lv.tiles.filter((t) => result(t.a, t.b) === target).map((t) => `${t.a}-${t.b}`);
@@ -60,8 +66,8 @@ describe('bộ sinh phép tính', () => {
   });
 
   test('cùng seed thì cùng màn, khác seed thì thường khác', () => {
-    expect(generateLevel(4, 3)).toEqual(generateLevel(4, 3));
-    expect(generateLevel(4, 3)).not.toEqual(generateLevel(4, 4));
+    expect(generateLevel(5, 3)).toEqual(generateLevel(5, 3));
+    expect(generateLevel(5, 3)).not.toEqual(generateLevel(5, 4));
   });
 });
 

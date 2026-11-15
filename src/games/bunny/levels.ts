@@ -21,6 +21,9 @@ export const DEFAULT_TARGET = 4;
 const PATH_LENGTH = 7;
 const MAX_CORRECT = 4;
 
+/** Mục tiêu 4 dùng đúng 6 phép tính của "Phiếu bài tập số 1" (giáo viên chọn), không sinh ngẫu nhiên. */
+export const WORKSHEET = { target: 4, tiles: [[5, 1], [7, 2], [6, 2], [7, 3], [8, 4], [9, 4]] as Array<[number, number]> };
+
 /** Số ô đúng của màn: tối đa 4, ít hơn khi mục tiêu lớn chỉ có ít phép trừ (7 chỉ có 8−1, 9−2, 10−3). */
 export function correctCount(target: number) {
   return Math.max(2, Math.min(MAX_CORRECT, 10 - target));
@@ -47,6 +50,7 @@ function pick<T>(arr: T[], r: () => number): T {
  * Ô đầu tiên luôn đúng; cố gắng không để 3 ô sai liền nhau (màn ít ô đúng thì không tránh được).
  */
 export function generateLevel(target: number, seed: number): Level {
+  if (target === WORKSHEET.target) return { target, tiles: WORKSHEET.tiles.map(([a, b], i) => ({ id: `t${i}`, a, b })) };
   const r = rng(seed);
   const right: Array<[number, number]> = [];
   for (let a = target + 1; a <= 10; a++) right.push([a, a - target]);
@@ -96,5 +100,10 @@ export function generateRace(targets: number[], seed: number): Level[] {
   if (targets.length < 2) return [first];
   let second = generateLevel(targets[1], seed + 1);
   for (let k = 2; k <= 20 && sequence(second) === sequence(first); k++) second = generateLevel(targets[1], seed + k);
+  // màn cố định (mục tiêu 4): đội Xanh đi cùng các phép tính nhưng bắt đầu từ ô thứ 3 (6 − 2, vẫn là ô đúng)
+  if (sequence(second) === sequence(first)) {
+    const t = second.tiles;
+    second = { ...second, tiles: [...t.slice(2), ...t.slice(0, 2)].map((x, i) => ({ ...x, id: `t${i}` })) };
+  }
   return [first, second];
 }

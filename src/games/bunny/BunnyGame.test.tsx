@@ -11,11 +11,11 @@ beforeEach(() => {
   });
 });
 
-test('mở từ cổng thì báo bảng 7 ô của làn, cùng số mục tiêu', () => {
+test('mở từ cổng thì báo bảng 6 phép tính của phiếu bài tập (mục tiêu 4), cùng số mục tiêu', () => {
   render(<BunnyGame />);
   const col = useTour.getState().recap!.columns;
   expect(col).toHaveLength(1);
-  expect(col[0].rows).toHaveLength(7);
+  expect(col[0].rows).toHaveLength(6);
   expect(col[0].target).toBe(useBunny.getState().levels[0].target);
   expect(col[0].rows.every((r) => !r.done)).toBe(true);
 });
