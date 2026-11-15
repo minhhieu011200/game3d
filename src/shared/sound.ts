@@ -58,7 +58,9 @@ const BASS = [
   [48, 55, 48, 55], [41, 48, 43, 50], [38, 45, 38, 45], [43, 50, 48, 48],
 ];
 const EIGHTH = 60 / 112 / 2;
-const MUSIC_VOL = 0.05;
+const MUSIC_VOL = 0.13;
+/** Nhân âm lượng hiệu ứng (giáo viên yêu cầu to hơn để cả lớp nghe rõ). */
+const SFX_GAIN = 2;
 
 const KEY = 'trochoi-toan1.sound';
 function loadPrefs(): { music: boolean; sfx: boolean } {
@@ -122,8 +124,17 @@ function schedule() {
   }
 }
 
+/** Đang ở trong một trò chơi: nhạc nền nghỉ, chỉ còn hiệu ứng. */
+let inGame = false;
+
+export function setInGame(on: boolean) {
+  inGame = on;
+  if (on) stopMusic();
+  else startMusic();
+}
+
 function startMusic() {
-  if (!ctx || timer !== null || !prefs.music) return;
+  if (!ctx || timer !== null || !prefs.music || inGame) return;
   musicBus = ctx.createGain();
   musicBus.gain.value = MUSIC_VOL;
   musicBus.connect(ctx.destination);
@@ -161,7 +172,7 @@ export function unlockSound() {
 export function sfx(name: Sfx, delay = 0) {
   if (!ctx || !prefs.sfx) return;
   const at = ctx.currentTime + delay;
-  for (const n of SFX[name]) tone(ctx.destination, n, at);
+  for (const n of SFX[name]) tone(ctx.destination, [n[0], n[1], n[2], n[3], n[4] * SFX_GAIN, n[5]], at);
 }
 
 export const soundPrefs = () => ({ ...prefs });

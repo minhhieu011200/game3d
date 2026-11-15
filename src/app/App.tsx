@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { setInGame } from '../shared/sound';
 import { GateBanner } from '../tour/GateBanner';
 import { RecapPopup } from '../tour/RecapPopup';
 import { useApp } from './store';
@@ -15,6 +16,8 @@ const ZooGame = lazy(() => import('../games/zoo/ZooGame'));
 export function App() {
   const screen = useApp((s) => s.screen);
   const gate = useApp((s) => s.gate);
+  // nhạc nền chỉ phát ở màn chào và trên đường đi; vào trò chơi thì nghỉ
+  useEffect(() => setInGame(!['home', 'tour', 'about'].includes(screen)), [screen]);
   const content = (
     <Suspense fallback={<div className="loading">Đang tải…</div>}>
       {screen === 'home' && <HomeScreen />}
