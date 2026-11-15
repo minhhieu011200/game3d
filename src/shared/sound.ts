@@ -290,6 +290,64 @@ export function sfx(name: Sfx, delay = 0) {
   for (const n of SFX[name]) tone(ctx.destination, [n[0], n[1], n[2], n[3], n[4] * SFX_GAIN, n[5]], at);
 }
 
+let noiseBuf: AudioBuffer | null = null;
+/** Vang ngoài trời: tiếng nổ dội lại kéo dài vài giây như pháo hoa thật. */
+let fwBus: AudioNode | null = null;
+
+function fireworkBus(c: AudioContext) {
+  if (fwBus) return fwBus;
+  noiseBuf = c.createBuffer(1, c.sampleRate * 3, c.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  // xung vang 3,5 giây: tiếng ồn tắt dần, hai kênh khác nhau cho rộng
+  const len = c.sampleRate * 3.5;
+  const ir = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const v = ir.getChannelData(ch);
+    for (let i = 0; i < len; i++) v[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3;
+  }
+  const verb = c.createConvolver();
+  verb.buffer = ir;
+  const wet = c.createGain();
+  wet.gain.value = 0.6;
+  const bus = c.createGain();
+  bus.connect(c.destination);
+  bus.connect(verb).connect(wet).connect(c.destination);
+  return (fwBus = bus);
+}
+
+/** Pháo hoa: tiếng xì bay lên (`rise` giây), tiếng "đùng" trầm có vang, rồi tràng lách tách. Chỉ dùng tiếng ồn, không có nốt nhạc. */
+export function firework(rise: number) {
+  if (!ctx || !prefs.sfx) return;
+  const c = ctx;
+  const out = fireworkBus(c);
+  const noise = (at: number, dur: number, vol: number, type: BiquadFilterType, from: number, to = from, attack = 0.003) => {
+    const src = c.createBufferSource();
+    const filter = c.createBiquadFilter();
+    const gain = c.createGain();
+    src.buffer = noiseBuf;
+    filter.type = type;
+    filter.frequency.setValueAtTime(from, at);
+    filter.frequency.exponentialRampToValueAtTime(to, at + dur);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(vol, at + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    src.connect(filter).connect(gain).connect(out);
+    src.start(at, Math.random() * 1.5);
+    src.stop(at + dur + 0.05);
+  };
+  const t = c.currentTime;
+  // tiếng xì của tên lửa bay lên: ồn dải hẹp, cao dần
+  noise(t, rise, 0.05 * SFX_GAIN, 'bandpass', 1500, 4000, rise * 0.6);
+  const boom = t + rise;
+  // "đùng": thân trầm rền và lớp vỡ sáng
+  noise(boom, 2.2, 0.9 * SFX_GAIN, 'lowpass', 600, 60);
+  noise(boom, 0.35, 0.35 * SFX_GAIN, 'lowpass', 3500, 400);
+  // tràng lách tách của tàn pháo rơi
+  const crackles = 25 + Math.floor(Math.random() * 20);
+  for (let i = 0; i < crackles; i++) noise(boom + 0.4 + Math.random() * 1.8, 0.02 + Math.random() * 0.03, (0.05 + Math.random() * 0.1) * SFX_GAIN, 'highpass', 2500);
+}
+
 export const soundPrefs = () => ({ ...prefs });
 
 export function setMusicOn(on: boolean) {

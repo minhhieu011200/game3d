@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useQuality } from '../shared/3d/quality';
+import { firework, setInGame } from '../shared/sound';
 import { ArchBody, Balloons } from './Decor';
 import { CLASS_NAME, gateNumber, GATE_IDS, SQUARE, STATIONS, type GateId } from './logic';
 import type { RecapData } from './recap';
@@ -260,6 +261,7 @@ const RISE = 0.9; // giây bay lên
 /** Độ to của phát nổ. */
 const POWER = 1.45;
 const LIFE = 2.6; // giây từ lúc nổ tới lúc tàn
+const SHOW = 5; // giây bắn pháo hoa khi tới quảng trường
 
 interface Burst {
   /** < 0: chờ; 0 … RISE: đang bay lên; > RISE: đã nổ. */
@@ -309,6 +311,7 @@ function Fireworks() {
   const r = useMemo(() => rng(11), []);
   // giữa cổng chúc mừng: cổng ở z cục bộ = arch.z, tức lùi theo hướng đường đi một đoạn -arch.z
   const center = useMemo(() => PATH.getPointAt(SQUARE_T).add(PATH.getTangentAt(SQUARE_T).multiplyScalar(-SQUARE_LAYOUT.arch.z)), []);
+  const shown = useRef(0);
   const bursts = useRef<Burst[]>(Array.from({ length: BURSTS }, (_, i) => newBurst(r, center, i * 0.55)));
   const { sparks, flashes } = useMemo(() => {
     const mk = (n: number) => {
@@ -334,8 +337,15 @@ function Fireworks() {
     const fpos = flashes.attributes.position as THREE.BufferAttribute;
     const fcol = flashes.attributes.color as THREE.BufferAttribute;
     const tmp = new THREE.Vector3();
+    shown.current += Math.min(dt, 0.05);
     bursts.current.forEach((b, bi) => {
+      const prev = b.age;
       b.age += Math.min(dt, 0.05);
+      if (prev <= 0 && b.age > 0) {
+        // chỉ bắn trong SHOW giây đầu; sau đó quả nào chưa bay thì thôi hẳn
+        if (shown.current > SHOW) b.age = -Infinity;
+        else firework(RISE);
+      }
       if (b.age > RISE + LIFE) bursts.current[bi] = b = newBurst(r, center, 0.2 + r() * 0.8);
       const base = bi * (N + TRAIL);
       const hide = (i: number) => {
@@ -509,6 +519,12 @@ function OpsBoard({ title, columns }: { title: string; columns: string[][] }) {
 export function Square() {
   const q = useQuality();
   const atSquare = useTour((s) => s.at === SQUARE && s.phase === 'atGate');
+  // ở quảng trường: nhạc nền nghỉ, chỉ còn tiếng pháo hoa
+  useEffect(() => {
+    if (!atSquare) return;
+    setInGame(true);
+    return () => setInGame(false);
+  }, [atSquare]);
   const p = PATH.getPointAt(SQUARE_T);
   const d = PATH.getTangentAt(SQUARE_T);
   const yaw = Math.atan2(-d.x, -d.z);
