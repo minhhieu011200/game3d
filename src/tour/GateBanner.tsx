@@ -66,7 +66,7 @@ export function GateBanner({ gate }: { gate: GateId }) {
           >
             <header className="rp-head">
               <div className="rp-title">📝 {sheet.title}</div>
-              <div className="rp-sub">Em hãy nối mỗi phép tính với hình thích hợp.</div>
+              <div className="rp-sub">Quan sát hình và lựa chọn phép tính thích hợp.</div>
             </header>
             <div className="ws-name">
               <span>Họ và tên:</span>

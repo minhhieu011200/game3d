@@ -147,14 +147,14 @@ test('Bài 4: kết quả như phiếu nối – có đáp án thì có kết qu
     './images/bai4-co.png',
   ]);
   const lines = () => Array.from(document.querySelectorAll('.mt-lines line')).map((l) => [l.getAttribute('y1'), l.getAttribute('y2')]);
-  // ếch (dòng 1) nối tới hình ếch (hình thứ 2)
-  expect(lines()).toEqual([['50', '150']]);
+  // [y bên hình (trái), y bên phép tính (phải)]: hình ếch (thứ 2) nối tới phép ếch (dòng 1)
+  expect(lines()).toEqual([['150', '50']]);
   // kết quả luôn hiện, kể cả phép chưa có đáp án
   expect(Array.from(document.querySelectorAll('.mt-res')).map((e) => e.textContent)).toEqual(['5', '8', '7']);
   fireEvent.click(screen.getByLabelText('Xem đường nối 10 trừ 3'));
-  // trứng (dòng 3) nối tới hình trứng (hình thứ 1)
+  // hình trứng (thứ 1) nối tới phép trứng (dòng 3)
   expect(lines()).toEqual([
-    ['50', '150'],
-    ['250', '50'],
+    ['150', '50'],
+    ['50', '250'],
   ]);
 });

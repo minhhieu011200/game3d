@@ -223,10 +223,11 @@ export function MatchLines({ rows, sheet = false }: { rows: RecapRow[]; sheet?: 
             <line
               key={i}
               className={r.done ? '' : 'revealed'}
+              // x = 0 là cột hình (bên trái), x = 100 là cột phép tính (bên phải)
               x1={0}
-              y1={i * 100 + 50}
+              y1={MATCH_PICS.findIndex((p) => p.icon === r.icon) * 100 + 50}
               x2={100}
-              y2={MATCH_PICS.findIndex((p) => p.icon === r.icon) * 100 + 50}
+              y2={i * 100 + 50}
               vectorEffect="non-scaling-stroke"
             />
           ) : null,
